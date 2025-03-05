@@ -1,0 +1,8 @@
+all-quests-checkmarks/dist/
+all-quests-checkmarks/node_modules/
+all-quests-checkmarks/types/
+all-quests-checkmarks/package-lock.json
+
+.vs/**
+bin/**
+obj/**

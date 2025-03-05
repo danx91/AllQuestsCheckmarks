@@ -1,0 +1,10 @@
+{
+	"aqc_in_stash": "W kryjówce: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> FiR)",
+	"aqc_total_needed": "Potrzeba łącznie: <color=#FFFF66>{0}</color>",
+	"aqc_total_needed_alt": "Potrzeba łącznie: <color=#FFFF66>{0}</color> FiR, <color=#FF6666>{1}</color> Nie-FiR",
+	"aqc_active_quests": "Aktywne zadania:",
+	"aqc_future_quests": "Przyszłe zadania:",
+	"aqc_fir": "FiR",
+	"aqc_nonfir": "Nie FiR",
+	"aqc_squad_quests": "Wymagane dla drużyny:"
+}

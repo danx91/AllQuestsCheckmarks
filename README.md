@@ -33,15 +33,15 @@ More detailed description and screenshots are available on [SPT Hub](https://hub
 
 ## Building from source
 * Server:
-	1. Open solution in Visual Studio
-	2. Build binaries: `Build > Build Solution` or press `F7`
-	3. Move built binaries, assets and locales to `BepInEx/plugin/AllQuestsCheckmarks/` directory
+	* Open solution in Visual Studio
+	* Build binaries: `Build > Build Solution` or press `F7`
+	* Move built binaries, assets and locales to `BepInEx/plugin/AllQuestsCheckmarks/` directory
 * Client:
-	1. Navigate to `all-quests-checkmarks/` directory
-	2. Open CMD here
-	3. Run command `npm run build`
-	4. Open `dist/all-quests-checkmarks.zip`
-	5. Move files to your SPT directory
+	* Navigate to `all-quests-checkmarks/` directory
+	* Open CMD here
+	* Run command `npm run build`
+	* Open `dist/all-quests-checkmarks.zip`
+	* Move files to your SPT directory
 
 ## Credits
 * Server side part is based on examples provided by [Single Player Tarkov](https://github.com/sp-tarkov/mod-examples/tree/master).

@@ -18,7 +18,7 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static Color _checkmarkColorDefault = new Color(0.749f, 0, 1);
         public static Color _nonFirColorDefault = new Color(0.451f, 0.149f, 0.302f);
-        public static Color _squadColorDefault = new Color(0.765f, 0.098f, 0.965f);
+        public static Color _squadColorDefault = new Color(1, 0.2f, 0.2f);
 
         public static Color _checkmarkColor = _checkmarkColorDefault;
         public static Color _nonFirColor = _checkmarkColorDefault;
@@ -29,17 +29,17 @@ namespace AllQuestsCheckmarks.Helpers
             includeCollector = config.Bind("1. General",
                                            "Include Collector quest (Fence)",
                                            true,
-                                           "Wether or not to include items needed for Collector quest");
+                                           "Whether or not to include items needed for Collector quest");
 
             includeLoyaltyRegain = config.Bind("1. General",
                                                "Include loyalty regain quests",
                                                false,
-                                               "Wether or not to include quests for regaining loyalty  (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)");
+                                               "Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)");
 
             includeNonFir = config.Bind("1. General",
                                         "Include non-FiR quest",
                                         true,
-                                        "Wether or not to include quests that don't require found in raid items");
+                                        "Whether or not to include quests that don't require found in raid items");
 
             checkmarkColor = config.Bind("2. Colors",
                                          "Checkmark color",
@@ -49,7 +49,7 @@ namespace AllQuestsCheckmarks.Helpers
             nonFirColor = config.Bind("2. Colors",
                                       "Checkmark color (non-FIR)",
                                       "#73264d",
-                                      "Color of checkmark if item is not currently needed but is required for future quests (either HEX #ffffff or RGB 255,255,255)");
+                                      "Color of checkmark if non-FiR item is not currently needed but is required for future quests (either HEX #ffffff or RGB 255,255,255)");
 
             if (Plugin.isFikaInstalled)
             {
@@ -60,7 +60,7 @@ namespace AllQuestsCheckmarks.Helpers
 
                 squadColor = config.Bind("2. Colors",
                                          "Checkmark color (squad members)",
-                                         "#ff6666",
+                                         "#ff3333",
                                          "Color of checkmark if item is not currently needed but is required for one of your squad members (either HEX #ffffff or RGB 255,255,255)");
             }
 

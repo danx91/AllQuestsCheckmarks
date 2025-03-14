@@ -21,15 +21,37 @@ More detailed description and screenshots are available on [SPT Hub](https://hub
 6. Start server and client and make sure that mod is working
 
 ## Config
+You can access config while in-game by pressing `F12` key and then selecting `AllQuestsCheckmarks` tab
+
+### General
 * **Include Collector quest (Fence)** - Whether or not to include items needed for Collector quest
 * **Include loyalty regain quests** - Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)
 * **Include non-FiR quest** - Whether or not to include quests that don't require found in raid items
+* **Hide checkmark if have enough (in raid)** - Whether or not to hide checkmark in raid on items that you have enough for all active and future quests. Be careful when using with 'Include items in PMC inventory (in raid)', as this combo may hide checkmarks while still in raid!
+* **Include items in PMC inventory (in raid)** - Whether or not to include items in PMC inventory while in raid in 'In Stash' count
 * **Mark squad members quests** - Whether or not to mark items currently needed for players in your squad (**FIKA only**)
+
+### Colors
 * **Checkmark color** - Color of checkmark if item is not currently needed but is required for future quests<sup>*</sup>
 * **Checkmark color (non-FIR)** - "Color of checkmark if non-FiR item is not currently needed but is required for future quests<sup>*</sup>
-* **Checkmark color** - Color of checkmark if item is not currently needed but is required for future quests<sup>*</sup> (**FIKA only**)
+* **Collector color** - Color of checkmark for collector quest<sup>*</sup>
+* **Use different color if have enough** - Whether or not to use different checkmark color if you have enough items for all quests. 'Hide checkmark if have enough' option will hide this checkmark while in raid
+* **Have enough color** - Color of checkmark if you have enough items for all quests<sup>*</sup>
+* **Use custom quest checkmark color** - Whether or not to use custom checkmark color for active quests
+* **Custom quest color** - Custom color of default quest checkmark<sup>*</sup>
+* **Checkmark color (squad members)** - Wether or not to mark items currently needed for players in your squad<sup>*</sup> (**FIKA only**)
+
+### Text
+* **Use bullet points** - Whether or not to use bullet points in quests list
+* **Use custom text colors** - Whether or not to use custom text colors
+* **Custom text color - active quests** - Custom color of active quests text<sup>*</sup>
+* **Custom text color - future quests** - Custom color of future quests text<sup>*</sup>
+* **Custom text color - squad quests** - Custom color of squad quests text<sup>*</sup>
 
 <sup>*</sup> - accepted color formats are: HEX `#RRGGBB` or RGB (0-255 range) `RRR,GGG,BBB` (e.g. #FF00FF or 255,0,255)
+
+## Translating
+Detailed info about translating can be found [here](locales/).
 
 ## Building from source
 * Server:

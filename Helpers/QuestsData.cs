@@ -57,8 +57,6 @@ namespace AllQuestsCheckmarks.Helpers
             }
         }
 
-        private static readonly string COLLECTOR_ID = "5c51aac186f77432ea65c552";
-
         private static JArray questsData;
         private static readonly List<string> unreachableQuests = new List<string>();
 
@@ -196,7 +194,7 @@ namespace AllQuestsCheckmarks.Helpers
                     Plugin.LogSource.LogError($"Quest {questId} is missing finish conditions!");
                     continue;
                 }
-                else if (questId == COLLECTOR_ID && !Settings.includeCollector.Value)
+                else if (questId == QuestsHelper.COLLECTOR_ID && !Settings.includeCollector.Value)
                 {
                     Plugin.LogDebug("Collector skipped");
                     continue;

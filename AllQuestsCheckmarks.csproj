@@ -112,6 +112,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationManagerAttributes.cs" />
     <Compile Include="Helpers\Assets.cs" />
     <Compile Include="Helpers\FikaEventSubscriber.cs" />
     <Compile Include="Helpers\SquadQuests.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Helpers\QuestsData.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Patches\ItemSpecificationPanelPatch.cs" />
+    <Compile Include="Patches\LocalGameStartPatch.cs" />
     <Compile Include="Patches\UpdateApplicationLanguagePatch.cs" />
     <Compile Include="Patches\ProfileSelectionPatch.cs" />
     <Compile Include="Patches\QuestClassPatch.cs" />

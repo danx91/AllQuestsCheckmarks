@@ -54,16 +54,24 @@ namespace AllQuestsCheckmarks.Patches
             bool neededForActive = false;
             bool neededForFuture = false;
             bool neededForFriend = false;
+            bool collectorOnly = true;
 
+            int totalNeededFir = 0;
+            int totalNeededNonFir = 0;
             int handedOverFir = 0;
             int handedOverNonFir = 0;
 
             string activeQuestsTooltip = "";
             string futureQuestsTooltip = "";
 
+            bool useCustomTextColors = Settings.customTextColors.Value;
+            string indent = Settings.bulletPoint.Value ? "  · " : "  ";
+
             if (QuestsHelper.GetActiveQuestsWithItem(profile, item, out Dictionary<string, QuestsHelper.CurrentQuest> activeQuests,
                 out Dictionary<string, QuestsHelper.CurrentQuest> fulfilled))
             {
+                string activeColor = useCustomTextColors ? Settings.activeQuestTextColor.hex : "#dd831a";
+
                 foreach (KeyValuePair<string, QuestsHelper.CurrentQuest> keyValuePair in activeQuests)
                 {
                     keyValuePair.Deconstruct(out _, out QuestsHelper.CurrentQuest quest);
@@ -81,7 +89,7 @@ namespace AllQuestsCheckmarks.Patches
                         continue;
                     }
 
-                    activeQuestsTooltip += $"\n  · <color=#dd831a>{quest.template.Name}</color>: ";
+                    activeQuestsTooltip += $"\n{indent}<color={activeColor}>{quest.template.Name}</color>: ";
 
                     if (quest.condition is ConditionHandoverItem condition
                         && profile.TaskConditionCounters.TryGetValue(condition.id, out TaskConditionCounterClass counter))
@@ -89,10 +97,12 @@ namespace AllQuestsCheckmarks.Patches
                         if (condition.onlyFoundInRaid)
                         {
                             handedOverFir += counter.Value;
+                            totalNeededFir += (int) condition.value - counter.Value;
                         }
                         else
                         {
                             handedOverNonFir += counter.Value;
+                            totalNeededNonFir += (int) condition.value - counter.Value;
                         }
 
                         activeQuestsTooltip += $"{counter.Value}/{condition.value}";
@@ -125,11 +135,10 @@ namespace AllQuestsCheckmarks.Patches
 
             if (QuestsHelper.IsNeededForActiveOrFutureQuests(item, out QuestsData.ItemData itemData))
             {
-                if(itemData.fir + itemData.nonFir - handedOverFir - handedOverNonFir > 0)
-                {
-                    ___string_5 += "\n" + string.Format((showNonFir ? "aqc_total_needed_alt" : "aqc_total_needed").Localized(null),
-                        itemData.fir - handedOverFir, itemData.nonFir - handedOverNonFir);
-                }
+                string futureColor = useCustomTextColors ? Settings.futureQuestTextColor.hex : "#d24dff";
+
+                totalNeededFir = itemData.fir - handedOverFir;
+                totalNeededNonFir = itemData.nonFir - handedOverNonFir;
 
                 foreach (KeyValuePair<string, QuestsData.QuestValues> quest in itemData.quests)
                 {
@@ -142,6 +151,11 @@ namespace AllQuestsCheckmarks.Patches
                     {
                         neededForFuture = true;
                         futureQuestsTooltip = "\n" + "aqc_future_quests".Localized();
+                    }
+
+                    if(quest.Key != QuestsHelper.COLLECTOR_ID)
+                    {
+                        collectorOnly = false;
                     }
 
                     string questName = quest.Value.localizedName.Localized(null);
@@ -157,7 +171,7 @@ namespace AllQuestsCheckmarks.Patches
                         }
                     }
 
-                    futureQuestsTooltip += $"\n  · <color=#d24dff>{questName}</color>: {quest.Value.count.count}";
+                    futureQuestsTooltip += $"\n{indent}<color={futureColor}>{questName}</color>: {quest.Value.count.count}";
 
                     if (showNonFir)
                     {
@@ -166,37 +180,108 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
+            if(totalNeededFir > 0 || showNonFir && totalNeededNonFir > 0)
+            {
+                ___string_5 += "\n" + string.Format((showNonFir ? "aqc_total_needed_alt" : "aqc_total_needed").Localized(null),
+                       totalNeededFir, totalNeededNonFir);
+            }
+
             ___string_5 += activeQuestsTooltip + futureQuestsTooltip;
 
-            //TODO: Check if player is in raid? (IsNeededForSquadMembers will return false outside raid anyway, so idk)
             if (Plugin.isFikaInstalled && Settings.squadQuests.Value && SquadQuests.IsNeededForSquadMembers(item, out List<string> members))
             {
+                string squadColor = useCustomTextColors ? Settings.squadQuestTextColor.hex : "#ffc299";
+
                 neededForFriend = true;
                 ___string_5 += "\n" + "aqc_squad_quests".Localized(null);
 
                 foreach(string nick in members)
                 {
-                    ___string_5 += $"\n  · <color=#ffc299>{nick}</color>";
+                    ___string_5 += $"\n{indent}<color={squadColor}>{nick}</color>";
+                }
+            }
+
+            int leftFir = inStash.fir - totalNeededFir;
+            switch(QuestsHelper.GetCheckmarkStatus(neededForActive, neededForFuture, neededForFriend, item.MarkedAsSpawnedInSession,
+                leftFir >= 0 && inStash.nonFir + leftFir - totalNeededNonFir >= 0, collectorOnly))
+            {
+                case QuestsHelper.ECheckmarkStatus.Fir:
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
+                    break;
+                case QuestsHelper.ECheckmarkStatus.Active:
+                    if (Settings.useCustomQuestColor.Value)
+                    {
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.customQuestColor.color);
+                    }
+                    else
+                    {
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____questItemSprite, QuestsHelper.DEFAULT_COLOR);
+                    }
+                    break;
+                case QuestsHelper.ECheckmarkStatus.Future:
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite,
+                        item.MarkedAsSpawnedInSession ? Settings.checkmarkColor.color : Settings.nonFirColor.color);
+                    break;
+                case QuestsHelper.ECheckmarkStatus.Squad:
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.squadColor.color);
+                    break;
+                case QuestsHelper.ECheckmarkStatus.Fulfilled:
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.enoughItemsColor.color);
+                    break;
+                case QuestsHelper.ECheckmarkStatus.Collector:
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.collectorColor.color);
+                    break;
+            }
+
+            /*if ((neededForActive || neededForFuture) && totalNeededFir - inStash.fir <= 0 && totalNeededNonFir - inStash.nonFir <= 0)
+            {
+                if (Settings.hideFulfilled.Value && QuestsHelper.IsInRaid())
+                {
+                    if (item.MarkedAsSpawnedInSession)
+                    {
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
+                    }
+
+                    return false;
+                }
+                else if (Settings.markEnoughItems.Value)
+                {
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.enoughItemsColor.color);
+                    return false;
                 }
             }
 
             if (neededForActive)
             {
-                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____questItemSprite, QuestsHelper.DEFAULT_COLOR);
+                if (Settings.useCustomQuestColor.Value)
+                {
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.customQuestColor.color);
+                }
+                else
+                {
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____questItemSprite, QuestsHelper.DEFAULT_COLOR);
+                }
             }
             else if(neededForFuture)
             {
-                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite,
-                    item.MarkedAsSpawnedInSession ? Settings._checkmarkColor : Settings._nonFirColor);
+                if (collectorOnly)
+                {
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.collectorColor.color);
+                }
+                else
+                {
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite,
+                        item.MarkedAsSpawnedInSession ? Settings.checkmarkColor.color : Settings.nonFirColor.color);
+                }
             }
             else if(neededForFriend)
             {
-                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings._squadColor);
+                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.squadColor.color);
             }
             else if (item.MarkedAsSpawnedInSession)
             {
                 QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
-            }
+            }*/
 
             return false;
         }

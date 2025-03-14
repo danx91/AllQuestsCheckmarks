@@ -13,11 +13,11 @@ namespace AllQuestsCheckmarks.Helpers
         {
             FikaEventDispatcher.SubscribeEvent((FikaRaidStartedEvent e) =>
             {
-                Plugin.LogDebug("FIKA Raid Started");
+                Plugin.LogDebug("Fika Raid Started");
 
                 if(!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    Plugin.LogSource.LogError("Failed to get FIKA CoopHandler");
+                    Plugin.LogSource.LogError("Failed to get Fika CoopHandler");
                     return;
                 }
 
@@ -25,7 +25,6 @@ namespace AllQuestsCheckmarks.Helpers
 
                 foreach(CoopPlayer player in coopHandler.HumanPlayers)
                 {
-                    Plugin.LogDebug($"Player {player.Profile.Nickname} : {player.ProfileId}");
                     if(player != coopHandler.MyPlayer)
                     {
                         players.Add(player);
@@ -42,8 +41,14 @@ namespace AllQuestsCheckmarks.Helpers
 
             FikaEventDispatcher.SubscribeEvent((FikaGameEndedEvent e) =>
             {
-                Plugin.LogDebug("FIKA Game Ended");
+                Plugin.LogDebug("Fika Game Ended");
                 SquadQuests.ClearSquadQuests();
+            });
+
+            FikaEventDispatcher.SubscribeEvent((FikaGameCreatedEvent e) =>
+            {
+                Plugin.LogDebug("Fika Game Created");
+                QuestsHelper.BuildItemsCache();
             });
         }
     }

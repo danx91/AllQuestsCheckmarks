@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using EFT.UI.DragAndDrop;
+using SPT.Reflection.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ namespace AllQuestsCheckmarks.Helpers
     internal static class QuestsHelper
     {
         public static readonly Color DEFAULT_COLOR = new Color(1, 1, 1, 0.706f);
+        public static readonly string COLLECTOR_ID = "5c51aac186f77432ea65c552";
         public static readonly List<string> SPECIAL_BLACKLIST = new List<string>()
         {
             "5991b51486f77447b112d44f", //MS2000 Marker
@@ -37,10 +39,30 @@ namespace AllQuestsCheckmarks.Helpers
             "59c9392986f7742f6923add2", // Trust Regain (Therapist)
         };
 
+        private static readonly Dictionary<string, ItemsCount> itemsCache = new Dictionary<string, ItemsCount>();
+
+        public enum ECheckmarkStatus
+        {
+            None = 0,
+            Fir = 1,
+            Active = 2,
+            Future = 3,
+            Squad = 4,
+            Fulfilled = 5,
+            Collector = 6
+        }
+
         public class ItemsCount
         {
-            public int total = 0;
             public int fir = 0;
+            public int nonFir = 0;
+            public int total
+            {
+                get
+                {
+                    return fir + nonFir;
+                }
+            }
         }
 
         public class CurrentQuest
@@ -59,18 +81,92 @@ namespace AllQuestsCheckmarks.Helpers
         {
             ItemsCount itemsCount = new ItemsCount();
 
-            IEnumerable<Item> inStash = Singleton<HideoutClass>.Instance.AllStashItems.Where(i => i.TemplateId == itemId);
-            foreach(Item item in inStash)
+            Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
+            IEnumerable<Item> items;
+
+            if (IsInRaid())
+            {
+                if (itemsCache != null && itemsCache.TryGetValue(itemId, out ItemsCount cached))
+                {
+                    itemsCount.fir += cached.fir;
+                    itemsCount.nonFir += cached.nonFir;
+                }
+
+                if (!Settings.includeRaidItems.Value)
+                {
+                    return itemsCount;
+                }
+
+                items = profile.Inventory.GetPlayerItems(EPlayerItems.Equipment | EPlayerItems.QuestItems).Where(i => i.TemplateId == itemId);
+            }
+            else
+            {
+                items = profile.Inventory.GetPlayerItems(EPlayerItems.All).Where(i => i.TemplateId == itemId);
+            }
+
+            foreach (Item item in items)
             {
                 if (item.MarkedAsSpawnedInSession)
                 {
                     itemsCount.fir += item.StackObjectsCount;
                 }
-
-                itemsCount.total += item.StackObjectsCount;
+                else
+                {
+                    itemsCount.nonFir += item.StackObjectsCount;
+                }
             }
 
             return itemsCount;
+        }
+
+        public static void BuildItemsCache()
+        {
+            itemsCache.Clear();
+
+            Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
+            IEnumerable<Item> itemsToCache = profile.Inventory.GetPlayerItems(EPlayerItems.HideoutStashes);
+            IEnumerable<Item> stashItems = Singleton<HideoutClass>.Instance?.AllStashItems;
+            
+            if(stashItems != null)
+            {
+                itemsToCache = itemsToCache.Concat(stashItems);
+            }
+
+            foreach(Item item in itemsToCache)
+            {
+                if(itemsCache.TryGetValue(item.TemplateId, out ItemsCount itemsCount))
+                {
+                    if (item.MarkedAsSpawnedInSession)
+                    {
+                        itemsCount.fir += item.StackObjectsCount;
+                    }
+                    else
+                    {
+                        itemsCount.nonFir += item.StackObjectsCount;
+                    }
+                }
+                else
+                {
+                    ItemsCount count = new ItemsCount();
+
+                    if (item.MarkedAsSpawnedInSession)
+                    {
+                        count.fir = item.StackObjectsCount;
+                    }
+                    else
+                    {
+                        count.nonFir = item.StackObjectsCount;
+                    }
+
+                    itemsCache.Add(item.TemplateId, count);
+                }
+            }
+        }
+
+        public static bool IsInRaid()
+        {
+            bool? inRaid = Singleton<AbstractGame>.Instance?.InRaid;
+            return inRaid.HasValue && inRaid.Value;
         }
 
         public static bool IsNeededForActiveOrFutureQuests(Item item, out QuestsData.ItemData quests)
@@ -166,6 +262,40 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             return activeNonFir || item.MarkedAsSpawnedInSession;
+        }
+        
+        public static ECheckmarkStatus GetCheckmarkStatus(bool active, bool future, bool squad, bool fir, bool enough, bool collector)
+        {
+            if (enough && (active || future))
+            {
+                if(Settings.hideFulfilled.Value && IsInRaid())
+                {
+                    return squad ? ECheckmarkStatus.Squad : (fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None);
+                }
+                else if(Settings.markEnoughItems.Value)
+                {
+                    return squad ? ECheckmarkStatus.Squad : ECheckmarkStatus.Fulfilled;
+                }
+            }
+
+            if (active)
+            {
+                return ECheckmarkStatus.Active;
+            }
+            else if (future)
+            {
+                return collector ? ECheckmarkStatus.Collector : ECheckmarkStatus.Future;
+            }
+            else if (squad)
+            {
+                return ECheckmarkStatus.Squad;
+            }
+            else if (fir)
+            {
+                return ECheckmarkStatus.Fir;
+            }
+
+            return ECheckmarkStatus.None;
         }
 
         public static void SetCheckmark(QuestItemViewPanel panel, Image image, Sprite sprite, Color color)

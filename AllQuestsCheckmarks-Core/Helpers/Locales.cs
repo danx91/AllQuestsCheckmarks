@@ -6,11 +6,11 @@ namespace AllQuestsCheckmarks.Helpers
 {
     internal static class Locales
     {
-        private static List<string> loadedLocales = new List<string>();
+        private static readonly List<string> _loadedLocales = new List<string>();
 
         public static void LoadLocale(string localeId)
         {
-            if (loadedLocales.Contains(localeId) || !LocaleManagerClass.LocaleManagerClass.ContainsCulture(localeId))
+            if (_loadedLocales.Contains(localeId) || !LocaleManagerClass.LocaleManagerClass.ContainsCulture(localeId))
             {
                 return;
             }
@@ -39,7 +39,7 @@ namespace AllQuestsCheckmarks.Helpers
                 return;
             }
 
-            loadedLocales.Add(localeId);
+            _loadedLocales.Add(localeId);
             LocaleManagerClass.LocaleManagerClass.UpdateLocales(localeId, localeDict);
         }
     }

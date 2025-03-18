@@ -39,7 +39,7 @@ namespace AllQuestsCheckmarks.Helpers
             "59c9392986f7742f6923add2", // Trust Regain (Therapist)
         };
 
-        private static readonly Dictionary<string, ItemsCount> itemsCache = new Dictionary<string, ItemsCount>();
+        private static readonly Dictionary<string, ItemsCount> _itemsCache = new Dictionary<string, ItemsCount>();
 
         public enum ECheckmarkStatus
         {
@@ -54,26 +54,26 @@ namespace AllQuestsCheckmarks.Helpers
 
         public class ItemsCount
         {
-            public int fir = 0;
-            public int nonFir = 0;
-            public int total
+            public int Fir = 0;
+            public int NonFir = 0;
+            public int Total
             {
                 get
                 {
-                    return fir + nonFir;
+                    return Fir + NonFir;
                 }
             }
         }
 
         public class CurrentQuest
         {
-            public RawQuestClass template;
-            public ConditionItem condition;
+            public RawQuestClass Template;
+            public ConditionItem Condition;
 
             public CurrentQuest(RawQuestClass template, ConditionItem condition)
             {
-                this.template = template;
-                this.condition = condition;
+                this.Template = template;
+                this.Condition = condition;
             }
         }
 
@@ -86,13 +86,13 @@ namespace AllQuestsCheckmarks.Helpers
 
             if (IsInRaid())
             {
-                if (itemsCache != null && itemsCache.TryGetValue(itemId, out ItemsCount cached))
+                if (_itemsCache != null && _itemsCache.TryGetValue(itemId, out ItemsCount cached))
                 {
-                    itemsCount.fir += cached.fir;
-                    itemsCount.nonFir += cached.nonFir;
+                    itemsCount.Fir += cached.Fir;
+                    itemsCount.NonFir += cached.NonFir;
                 }
 
-                if (!Settings.includeRaidItems.Value)
+                if (!Settings.IncludeRaidItems.Value)
                 {
                     return itemsCount;
                 }
@@ -108,11 +108,11 @@ namespace AllQuestsCheckmarks.Helpers
             {
                 if (item.MarkedAsSpawnedInSession)
                 {
-                    itemsCount.fir += item.StackObjectsCount;
+                    itemsCount.Fir += item.StackObjectsCount;
                 }
                 else
                 {
-                    itemsCount.nonFir += item.StackObjectsCount;
+                    itemsCount.NonFir += item.StackObjectsCount;
                 }
             }
 
@@ -121,7 +121,7 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void BuildItemsCache()
         {
-            itemsCache.Clear();
+            _itemsCache.Clear();
 
             Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
             IEnumerable<Item> itemsToCache = profile.Inventory.GetPlayerItems(EPlayerItems.HideoutStashes);
@@ -134,15 +134,15 @@ namespace AllQuestsCheckmarks.Helpers
 
             foreach(Item item in itemsToCache)
             {
-                if(itemsCache.TryGetValue(item.TemplateId, out ItemsCount itemsCount))
+                if(_itemsCache.TryGetValue(item.TemplateId, out ItemsCount itemsCount))
                 {
                     if (item.MarkedAsSpawnedInSession)
                     {
-                        itemsCount.fir += item.StackObjectsCount;
+                        itemsCount.Fir += item.StackObjectsCount;
                     }
                     else
                     {
-                        itemsCount.nonFir += item.StackObjectsCount;
+                        itemsCount.NonFir += item.StackObjectsCount;
                     }
                 }
                 else
@@ -151,14 +151,14 @@ namespace AllQuestsCheckmarks.Helpers
 
                     if (item.MarkedAsSpawnedInSession)
                     {
-                        count.fir = item.StackObjectsCount;
+                        count.Fir = item.StackObjectsCount;
                     }
                     else
                     {
-                        count.nonFir = item.StackObjectsCount;
+                        count.NonFir = item.StackObjectsCount;
                     }
 
-                    itemsCache.Add(item.TemplateId, count);
+                    _itemsCache.Add(item.TemplateId, count);
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static bool IsNeededForActiveOrFutureQuests(Item item, out QuestsData.ItemData quests)
         {
-            if(QuestsData.questItemsByItemId.TryGetValue(item.TemplateId, out quests) && (item.MarkedAsSpawnedInSession && quests.total > 0 || quests.nonFir > 0))
+            if(QuestsData.QuestItemsByItemId.TryGetValue(item.TemplateId, out quests) && (item.MarkedAsSpawnedInSession && quests.Total > 0 || quests.NonFir > 0))
             {
                 return true;
             }
@@ -193,9 +193,9 @@ namespace AllQuestsCheckmarks.Helpers
                     continue;
                 }
 
-                foreach(KeyValuePair<EQuestStatus, GClass3779> keyValuePair in questDataClass.Template.Conditions)
+                foreach(KeyValuePair<EQuestStatus, GClass3878> keyValuePair in questDataClass.Template.Conditions)
                 {
-                    keyValuePair.Deconstruct(out EQuestStatus questStatus, out GClass3779 conditions);
+                    keyValuePair.Deconstruct(out EQuestStatus questStatus, out GClass3878 conditions);
 
                     ConditionItem tmpCondition = null;
                     bool isFulfilled = false;
@@ -247,7 +247,7 @@ namespace AllQuestsCheckmarks.Helpers
             {
                 foreach (KeyValuePair<string, CurrentQuest> quest in new Dictionary<string, CurrentQuest>(activeQuests))
                 {
-                    if (quest.Value.condition is ConditionWeaponAssembly conditionWeaponAssembly)
+                    if (quest.Value.Condition is ConditionWeaponAssembly conditionWeaponAssembly)
                     {
                         if (Inventory.IsWeaponFitsCondition(weapon, conditionWeaponAssembly, false))
                         {
@@ -268,11 +268,11 @@ namespace AllQuestsCheckmarks.Helpers
         {
             if (enough && (active || future))
             {
-                if(Settings.hideFulfilled.Value && IsInRaid())
+                if(Settings.HideFulfilled.Value && IsInRaid())
                 {
                     return squad ? ECheckmarkStatus.Squad : (fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None);
                 }
-                else if(Settings.markEnoughItems.Value)
+                else if(Settings.MarkEnoughItems.Value)
                 {
                     return squad ? ECheckmarkStatus.Squad : ECheckmarkStatus.Fulfilled;
                 }

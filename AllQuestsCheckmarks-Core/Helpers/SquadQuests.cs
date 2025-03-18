@@ -3,40 +3,34 @@ using Newtonsoft.Json.Linq;
 
 using EFT.InventoryLogic;
 using SPT.Common.Http;
-using Fika.Core.Coop.Players;
+using System.Linq;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     internal static class SquadQuests
     {
-        public static Dictionary<string, Dictionary<string, bool>> squadQuests = new Dictionary<string, Dictionary<string, bool>>();
-        private static Dictionary<string, string> squadNicks = new Dictionary<string, string>();
-        private static Dictionary<string, JArray> squadData;
+        public static Dictionary<string, Dictionary<string, bool>> SquadQuestsDict = new Dictionary<string, Dictionary<string, bool>>();
+        private static Dictionary<string, string> _squadNicks = new Dictionary<string, string>();
+        private static Dictionary<string, JArray> _squadData;
 
-        public static void LoadData(List<CoopPlayer> squadMembers)
+        public static void LoadData(Dictionary<string, string> squadMembers)
         {
-            squadNicks.Clear();
-
-            foreach(CoopPlayer player in squadMembers)
-            {
-                squadNicks.Add(player.ProfileId, player.Profile.Nickname);
-            }
-
-            squadData = JObject.Parse(RequestHandler.PostJsonAsync("/all-quests-checkmarks/active-quests", new JArray(squadNicks.Keys).ToJson()))
+            _squadNicks = new Dictionary<string, string>(squadMembers);
+            _squadData = JObject.Parse(RequestHandler.PostJsonAsync("/all-quests-checkmarks/active-quests", new JArray(_squadNicks.Keys).ToJson()))
                 .ToObject<Dictionary<string, JArray>>();
             ParseData();
         }
 
         public static void ParseData()
         {
-            squadQuests.Clear();
+            SquadQuestsDict.Clear();
 
-            foreach(KeyValuePair<string, JArray> keyValuePair in squadData)
+            foreach(KeyValuePair<string, JArray> keyValuePair in _squadData)
             {
                 keyValuePair.Deconstruct(out string profileId, out JArray questsData);
 
                 Dictionary<string, bool> playerQuests = new Dictionary<string, bool>();
-                squadQuests.Add(profileId, playerQuests);
+                SquadQuestsDict.Add(profileId, playerQuests);
 
                 for (int i = 0; i < questsData.Count; ++i)
                 {
@@ -92,18 +86,18 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void ClearSquadQuests()
         {
-            squadQuests.Clear();
+            SquadQuestsDict.Clear();
         }
 
         public static bool IsNeededForSquadMembers(Item item, out List<string> members)
         {
             members = new List<string>();
 
-            foreach(KeyValuePair<string, Dictionary<string, bool>> keyValuePair in squadQuests)
+            foreach(KeyValuePair<string, Dictionary<string, bool>> keyValuePair in SquadQuestsDict)
             {
                 keyValuePair.Deconstruct(out string profileId, out Dictionary<string, bool> items);
 
-                if (items.TryGetValue(item.TemplateId, out bool fir) && (!fir || item.MarkedAsSpawnedInSession) && squadNicks.TryGetValue(profileId, out string nick))
+                if (items.TryGetValue(item.TemplateId, out bool fir) && (!fir || item.MarkedAsSpawnedInSession) && _squadNicks.TryGetValue(profileId, out string nick))
                 {
                     members.Add(nick);
                 }

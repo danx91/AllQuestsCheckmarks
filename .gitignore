@@ -1,8 +1,13 @@
-all-quests-checkmarks/dist/
-all-quests-checkmarks/node_modules/
-all-quests-checkmarks/types/
-all-quests-checkmarks/package-lock.json
+/node_modules/
+/package.json
+/package-lock.json
+/dist/
 
-.vs/**
-bin/**
-obj/**
+AllQuestsCheckmarks-Server/dist/
+AllQuestsCheckmarks-Server/node_modules/
+AllQuestsCheckmarks-Server/types/
+AllQuestsCheckmarks-Server/package-lock.json
+
+**/.vs/**
+**/bin/**
+**/obj/**

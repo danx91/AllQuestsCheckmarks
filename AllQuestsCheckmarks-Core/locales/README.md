@@ -19,7 +19,7 @@ Every language that is supported by SPT can be added to this mod.
 * Do not edit text inside `<>` or `{}`
 * Things you need to translate are underlined in image below
 
-![help image](../images/translate.png)
+![help image](../../images/translate.png)
 
 ## Finishing
 1. Save your file by pressing green button `Commit changes`

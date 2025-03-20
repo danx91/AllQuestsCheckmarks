@@ -54,16 +54,21 @@ You can access config while in-game by pressing `F12` key and then selecting `Al
 Detailed info about translating can be found [here](AllQuestsCheckmarks-Core/locales/).
 
 ## Building from source
-* Server:
-	* Open solution in Visual Studio
+* Client Core:
+	* Open [solution](AllQuestsCheckmarks-Core/AllQuestsCheckmarks.sln) in Visual Studio
+	* Make sure you are using `Release` mode (only if you are going to create zip bundle)
 	* Build binaries: `Build > Build Solution` or press `F7`
-	* Move built binaries, assets and locales to `BepInEx/plugin/AllQuestsCheckmarks/` directory
-* Client:
-	* Navigate to `all-quests-checkmarks/` directory
-	* Open CMD here
-	* Run command `npm run build`
-	* Open `dist/all-quests-checkmarks.zip`
-	* Move files to your SPT directory
+* Client Fika Module:
+	* Open [solution](AllQuestsCheckmarks-Fika/AllQuestsCheckmarks-Fika.sln) in Visual Studio
+	* Make sure you are using `Release` mode (only if you are going to create zip bundle)
+	* Build binaries: `Build > Build Solution` or press `F7`
+* Server:
+	* No need to build
+* Bundling everything into zip:
+	* Adjust settings in [build.json](build.json)
+	* Open `cmd` in root directory
+	* Run command `node .\build.mjs`
+	* Your zip bundle will appear in `dist` folder
 
 ## Credits
 * Server side part is based on examples provided by [Single Player Tarkov](https://github.com/sp-tarkov/mod-examples/tree/master).

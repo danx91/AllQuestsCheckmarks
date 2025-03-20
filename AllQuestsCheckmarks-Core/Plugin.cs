@@ -9,34 +9,10 @@ using BepInEx.Bootstrap;
 using AllQuestsCheckmarks.Helpers;
 using AllQuestsCheckmarks.Patches;
 
-/* TODO:
- *  Hide chemark fulfilled - respect squad OK
- *  Update on take item - like quests
- *  
- * FIX:
- *  LeaveItem not shown as active quest
- *  Item condition - durability
- *  Multiple of same item (Sew it good)
- *  
- * DONE:
- *  Custom quest color
- *  Custom text colors
- *  Custom collector color
- *  No bullte points
- *  Count items in ho
- *  Count items on pmc
- *  Moving items removes from count [BUG]
- *  Fulfilled color + Settings OK
- *  Settings - remove cm if total met
- *  Better cache - better cache BUG: Stash areas = nonfir - move to special createcache OK
- *  Settings - count in raid items OK
- *  Count remaining fir towards nonfir OK
- */
-
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.1.1"),
+        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.0"),
         BepInDependency("com.SPT.core", "3.11.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
         BepInIncompatibility("VIP.TommySoucy.MoreCheckmarks")

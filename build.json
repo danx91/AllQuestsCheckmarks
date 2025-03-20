@@ -15,5 +15,8 @@
 		"AllQuestsCheckmarks-Fika/bin/Release/AllQuestsCheckmarks-Fika.dll": "client",
 		"AllQuestsCheckmarks-Core/locales": "client",
 		"AllQuestsCheckmarks-Core/Assets/AllQuestsCheckmarksAssets": "client"
-	}
+	},
+	"ignore": [
+		"**/*.md"
+	]
 }

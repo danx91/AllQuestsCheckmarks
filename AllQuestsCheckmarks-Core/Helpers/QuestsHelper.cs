@@ -161,6 +161,8 @@ namespace AllQuestsCheckmarks.Helpers
                     _itemsCache.Add(item.TemplateId, count);
                 }
             }
+
+            Plugin.LogSource.LogInfo($"Items cache built. Total items in cache: {_itemsCache.Count}");
         }
 
         public static bool IsInRaid()

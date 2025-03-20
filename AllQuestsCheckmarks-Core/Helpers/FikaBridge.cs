@@ -18,16 +18,19 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void InvokeRaidFinishedEvent()
         {
+            Plugin.LogDebug("InvokeRaidFinishedEvent");
             RaidFinishedEvent.Invoke();
         }
 
         public static void InvokeCoopPlayersEvent(Dictionary<string, string> players)
         {
+            Plugin.LogDebug("InvokeCoopPlayersEvent");
             CoopPlayersEvent.Invoke(players);
         }
 
         public static void InvokeBuildCacheEvent()
         {
+            Plugin.LogDebug("InvokeBuildCacheEvent");
             BuildCacheEvent.Invoke();
         }
     }

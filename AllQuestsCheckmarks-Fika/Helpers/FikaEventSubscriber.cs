@@ -29,7 +29,7 @@ namespace AllQuestsCheckmarks.Fika.Helpers
                 {
                     if(player != coopHandler.MyPlayer)
                     {
-                        players.Add(player.AccountId, player.Profile.Nickname);
+                        players.Add(player.ProfileId, player.Profile.Nickname);
                     }
                 }
 

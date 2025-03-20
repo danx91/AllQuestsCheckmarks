@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 
 using EFT.InventoryLogic;
 using SPT.Common.Http;
-using System.Linq;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -16,7 +15,7 @@ namespace AllQuestsCheckmarks.Helpers
         public static void LoadData(Dictionary<string, string> squadMembers)
         {
             _squadNicks = new Dictionary<string, string>(squadMembers);
-            _squadData = JObject.Parse(RequestHandler.PostJsonAsync("/all-quests-checkmarks/active-quests", new JArray(_squadNicks.Keys).ToJson()))
+            _squadData = JObject.Parse(RequestHandler.PostJson("/all-quests-checkmarks/active-quests", new JArray(_squadNicks.Keys).ToJson()))
                 .ToObject<Dictionary<string, JArray>>();
             ParseData();
         }
@@ -86,6 +85,7 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void ClearSquadQuests()
         {
+            Plugin.LogDebug("ClearSquadQuests");
             SquadQuestsDict.Clear();
         }
 

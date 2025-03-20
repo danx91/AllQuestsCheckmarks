@@ -8,6 +8,6 @@ AllQuestsCheckmarks-Server/node_modules/
 AllQuestsCheckmarks-Server/types/
 AllQuestsCheckmarks-Server/package-lock.json
 
-**/.vs/**
-**/bin/**
-**/obj/**
+**/.vs/
+**/bin/
+**/obj/

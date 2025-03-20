@@ -21,67 +21,67 @@ namespace AllQuestsCheckmarks.Helpers
 
         public class QuestValues
         {
-            public QuestItems count;
-            public string name;
-            public string localizedName;
+            public QuestItems Count;
+            public string Name;
+            public string LocalizedName;
 
             public QuestValues(int count, bool isFir, string name, string localizedName)
             {
-                this.count = new QuestItems(count, isFir);
-                this.name = name;
-                this.localizedName = localizedName;
+                this.Count = new QuestItems(count, isFir);
+                this.Name = name;
+                this.LocalizedName = localizedName;
             }
         }
 
         public class ItemData
         {
-            public int fir = 0;
-            public int nonFir = 0;
-            public int total {
+            public int Fir = 0;
+            public int NonFir = 0;
+            public int Total {
                 get
                 {
-                    return fir + nonFir;
+                    return Fir + NonFir;
                 }
             }
-            public Dictionary<string, QuestValues> quests = new Dictionary<string, QuestValues>();
+            public Dictionary<string, QuestValues> Quests = new Dictionary<string, QuestValues>();
         }
 
         public class QuestRequirements
         {
-            public string questId;
-            public List<QuestRequirements> list = new List<QuestRequirements>();
+            public string QuestId;
+            public List<QuestRequirements> List = new List<QuestRequirements>();
 
             public QuestRequirements(string questId)
             {
-                this.questId = questId;
+                this.QuestId = questId;
             }
         }
 
-        private static JArray questsData;
-        private static readonly List<string> unreachableQuests = new List<string>();
+        private static JArray _questsData;
+        private static readonly List<string> _unreachableQuests = new List<string>();
 
-        public static Dictionary<string, ItemData> questItemsByItemId = new Dictionary<string, ItemData>();
-        public static Dictionary<string, Dictionary<string, QuestItems>> questItemsByQuestId = new Dictionary<string, Dictionary<string, QuestItems>>();
+        public static Dictionary<string, ItemData> QuestItemsByItemId = new Dictionary<string, ItemData>();
+        public static Dictionary<string, Dictionary<string, QuestItems>> QuestItemsByQuestId = new Dictionary<string, Dictionary<string, QuestItems>>();
 
         public static async void LoadData()
         {
             Plugin.LogSource.LogInfo("Requesting quests data...");
-            questsData = JArray.Parse(await RequestHandler.GetJsonAsync("/all-quests-checkmarks/quests"));
+            _questsData = JArray.Parse(await RequestHandler.GetJsonAsync("/all-quests-checkmarks/quests"));
             CheckUnreachableQuests();
             ParseData();
         }
 
         private static void CheckUnreachableQuests()
         {
-            unreachableQuests.Clear();
+            _unreachableQuests.Clear();
 
             Dictionary<string, QuestRequirements> dependencyList = new Dictionary<string, QuestRequirements>();
             List<string> allQuestIds = new List<string>();
             List<string> unreachableRootQuestIds = new List<string>();
 
-            for (int i = 0; i < questsData.Count; ++i)
+            for (int i = 0; i < _questsData.Count; ++i)
             {
-                JObject quest = questsData[i] as JObject;
+                JObject quest = _questsData[i] as JObject;
                 string questId = quest["_id"].ToString();
                 if (quest["conditions"] == null || quest["conditions"]["AvailableForStart"] == null)
                 {
@@ -126,7 +126,7 @@ namespace AllQuestsCheckmarks.Helpers
                         dependencyList.Add(requirementId, requirement);
                     }
 
-                    questRequirements.list.Add(requirement);
+                    questRequirements.List.Add(requirement);
                 }
             }
 
@@ -135,7 +135,7 @@ namespace AllQuestsCheckmarks.Helpers
                 if(IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds))
                 {
                     Plugin.LogDebug($"Quest {questId} is unreachable");
-                    unreachableQuests.Add(questId);
+                    _unreachableQuests.Add(questId);
                 }
             }
         }
@@ -147,29 +147,29 @@ namespace AllQuestsCheckmarks.Helpers
                 cache = new Dictionary<string, bool>();
             }
 
-            if (unreachable.Contains(requirements.questId))
+            if (unreachable.Contains(requirements.QuestId))
             {
                 return true;
             }
-            else if (requirements.list.Count == 0)
+            else if (requirements.List.Count == 0)
             {
                 return false;
             }
-            else if (cache.TryGetValue(requirements.questId, out bool cached))
+            else if (cache.TryGetValue(requirements.QuestId, out bool cached))
             {
                 return cached;
             }
 
-            foreach (QuestRequirements req in requirements.list)
+            foreach (QuestRequirements req in requirements.List)
             {
                 if(IsQuestUnreachable(req, unreachable, cache))
                 {
-                    cache.Add(requirements.questId, true);
+                    cache.Add(requirements.QuestId, true);
                     return true;
                 }
             }
 
-            cache.Add(requirements.questId, false);
+            cache.Add(requirements.QuestId, false);
             return false;
         }
 
@@ -177,15 +177,15 @@ namespace AllQuestsCheckmarks.Helpers
         {
             Plugin.LogSource.LogInfo("Parsing quests data...");
 
-            questItemsByItemId.Clear();
-            questItemsByQuestId.Clear();
+            QuestItemsByItemId.Clear();
+            QuestItemsByQuestId.Clear();
 
-            for (int i = 0; i < questsData.Count; ++i)
+            for (int i = 0; i < _questsData.Count; ++i)
             {
-                JObject quest = questsData[i] as JObject;
+                JObject quest = _questsData[i] as JObject;
                 string questId = quest["_id"].ToString();
 
-                if (unreachableQuests.Contains(questId))
+                if (_unreachableQuests.Contains(questId))
                 {
                     continue;
                 }
@@ -194,12 +194,12 @@ namespace AllQuestsCheckmarks.Helpers
                     Plugin.LogSource.LogError($"Quest {questId} is missing finish conditions!");
                     continue;
                 }
-                else if (questId == QuestsHelper.COLLECTOR_ID && !Settings.includeCollector.Value)
+                else if (questId == QuestsHelper.COLLECTOR_ID && !Settings.IncludeCollector.Value)
                 {
                     Plugin.LogDebug("Collector skipped");
                     continue;
                 }
-                else if (!Settings.includeLoyaltyRegain.Value && QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
+                else if (!Settings.IncludeLoyaltyRegain.Value && QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
                 {
                     continue;    
                 }
@@ -226,7 +226,7 @@ namespace AllQuestsCheckmarks.Helpers
                         Plugin.LogSource.LogError($"Quest {questId} condition #{j} is missing target!");
                         continue;
                     }
-                    else if (!fir && !Settings.includeNonFir.Value)
+                    else if (!fir && !Settings.IncludeNonFir.Value)
                     {
                         Plugin.LogDebug($"Quest {questId} condition #{j} skipped (Non-FIR disabled)");
                         continue;
@@ -280,10 +280,10 @@ namespace AllQuestsCheckmarks.Helpers
         public static void AddItem(string itemId, int count, bool fir, bool skipCheck, string questId, string questName, string questLocalizedName)
         {
             //Add to quest list
-            if(!questItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
+            if(!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
             {
                 questItems = new Dictionary<string, QuestItems>();
-                questItemsByQuestId.Add(questId, questItems);
+                QuestItemsByQuestId.Add(questId, questItems);
             }
 
             if(questItems.TryGetValue(itemId, out QuestItems q) && !skipCheck)
@@ -302,13 +302,13 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             //Add to item list
-            if(!questItemsByItemId.TryGetValue(itemId, out ItemData items))
+            if(!QuestItemsByItemId.TryGetValue(itemId, out ItemData items))
             {
                 items = new ItemData();
-                questItemsByItemId.Add(itemId, items);
+                QuestItemsByItemId.Add(itemId, items);
             }
 
-            if(items.quests.TryGetValue(questId, out QuestValues questValues))
+            if(items.Quests.TryGetValue(questId, out QuestValues questValues))
             {
                 if(!skipCheck)
                 {
@@ -317,20 +317,20 @@ namespace AllQuestsCheckmarks.Helpers
                 }
 
                 Plugin.LogDebug($"Add duplicate [2] (questId={questId}, itemId={itemId}, savedFir={q.fir}, fir={fir})");
-                questValues.count.count += count;
+                questValues.Count.count += count;
             }
             else
             {
-                items.quests.Add(questId, new QuestValues(count, fir, questName ?? "Unknown Quest", questLocalizedName));
+                items.Quests.Add(questId, new QuestValues(count, fir, questName ?? "Unknown Quest", questLocalizedName));
             }
 
             if (fir)
             {
-                items.fir += count;
+                items.Fir += count;
             }
             else
             {
-                items.nonFir += count;
+                items.NonFir += count;
             }
         }
 
@@ -338,7 +338,7 @@ namespace AllQuestsCheckmarks.Helpers
         {
             Plugin.LogDebug($"Removing quest {questId}");
 
-            if (!questItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
+            if (!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
             {
                 Plugin.LogSource.LogError($"Attempted to remove non-existing quest {questId} from quest data!");
                 return;
@@ -348,35 +348,35 @@ namespace AllQuestsCheckmarks.Helpers
             {
                 item.Deconstruct(out string itemId, out QuestItems items);
 
-                if(!questItemsByItemId.TryGetValue(itemId, out ItemData itemData))
+                if(!QuestItemsByItemId.TryGetValue(itemId, out ItemData itemData))
                 {
                     Plugin.LogSource.LogError($"Attepted to remove non-existing quest item {item.Key} from quest {questId} data!");
                     continue;
                 }
 
-                itemData.quests.Remove(questId);
+                itemData.Quests.Remove(questId);
 
                 if (items.fir)
                 {
-                    itemData.fir -= items.count;
+                    itemData.Fir -= items.count;
                 }
                 else
                 {
-                    itemData.nonFir -= items.count;
+                    itemData.NonFir -= items.count;
                 }
 
-                if(itemData.quests.Count == 0)
+                if(itemData.Quests.Count == 0)
                 {
-                    if(itemData.total != 0)
+                    if(itemData.Total != 0)
                     {
-                        Plugin.LogSource.LogWarning($"Quest {questId} list for item {itemId} is empty, but item count is non-zero ({itemData.total})!");
+                        Plugin.LogSource.LogWarning($"Quest {questId} list for item {itemId} is empty, but item count is non-zero ({itemData.Total})!");
                     }
 
-                    questItemsByItemId.Remove(item.Key);
+                    QuestItemsByItemId.Remove(item.Key);
                 }
             }
 
-            questItemsByQuestId.Remove(questId);
+            QuestItemsByQuestId.Remove(questId);
         }
     }
 }

@@ -51,7 +51,7 @@ You can access config while in-game by pressing `F12` key and then selecting `Al
 <sup>*</sup> - accepted color formats are: HEX `#RRGGBB` or RGB (0-255 range) `RRR,GGG,BBB` (e.g. #FF00FF or 255,0,255)
 
 ## Translating
-Detailed info about translating can be found [here](locales/).
+Detailed info about translating can be found [here](AllQuestsCheckmarks-Core/locales/).
 
 ## Building from source
 * Server:

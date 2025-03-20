@@ -9,65 +9,65 @@ namespace AllQuestsCheckmarks.Helpers
     internal static class Settings
     {
         private static readonly Color _fallbackColor = new Color(0, 0, 0, 0);
-        private static readonly List<ColorEntry> allColors = new List<ColorEntry>();
+        private static readonly List<ColorEntry> _allColors = new List<ColorEntry>();
 
-        public static ConfigEntry<bool> includeCollector;
-        public static ConfigEntry<bool> includeLoyaltyRegain;
-        public static ConfigEntry<bool> includeNonFir;
-        public static ConfigEntry<bool> hideFulfilled;
-        public static ConfigEntry<bool> includeRaidItems;
-        public static ConfigEntry<bool> squadQuests;
-        public static ConfigEntry<bool> markEnoughItems;
-        public static ConfigEntry<bool> useCustomQuestColor;
-        public static ConfigEntry<bool> bulletPoint;
-        public static ConfigEntry<bool> customTextColors;
-        public static ConfigEntry<bool> showDebug;
+        public static ConfigEntry<bool> IncludeCollector;
+        public static ConfigEntry<bool> IncludeLoyaltyRegain;
+        public static ConfigEntry<bool> IncludeNonFir;
+        public static ConfigEntry<bool> HideFulfilled;
+        public static ConfigEntry<bool> IncludeRaidItems;
+        public static ConfigEntry<bool> SquadQuests;
+        public static ConfigEntry<bool> MarkEnoughItems;
+        public static ConfigEntry<bool> UseCustomQuestColor;
+        public static ConfigEntry<bool> BulletPoints;
+        public static ConfigEntry<bool> CustomTextColors;
+        public static ConfigEntry<bool> ShowDebug;
 
-        public static ColorEntry checkmarkColor;
-        public static ColorEntry nonFirColor;
-        public static ColorEntry collectorColor;
-        public static ColorEntry enoughItemsColor;
-        public static ColorEntry customQuestColor;
-        public static ColorEntry squadColor;
-        public static ColorEntry activeQuestTextColor;
-        public static ColorEntry futureQuestTextColor;
-        public static ColorEntry squadQuestTextColor;
+        public static ColorEntry CheckmarkColor;
+        public static ColorEntry NonFirColor;
+        public static ColorEntry CollectorColor;
+        public static ColorEntry EnoughItemsColor;
+        public static ColorEntry CustomQuestColor;
+        public static ColorEntry SquadColor;
+        public static ColorEntry ActiveQuestTextColor;
+        public static ColorEntry FutureQuestTextColor;
+        public static ColorEntry SquadQuestTextColor;
 
         public class ColorEntry
         {
-            public ConfigEntry<string> entry;
-            public Color color;
-            public string hex;
+            public ConfigEntry<string> Entry;
+            public Color Color;
+            public string Hex;
 
             private Color _color;
 
             public ColorEntry(ConfigEntry<string> entry, Color color)
             {
-                this.entry = entry;
+                this.Entry = entry;
                 this._color = color;
-                this.color = color;
-                this.hex = ColorToHex(color);
+                this.Color = color;
+                this.Hex = ColorToHex(color);
 
                 entry.SettingChanged += delegate
                 {
                     Parse();
                 };
 
-                allColors.Add(this);
+                _allColors.Add(this);
             }
 
             public void Parse()
             {
-                this.color = ParseColor(entry.Value, _color);
-                this.hex = ColorToHex(color);
+                this.Color = ParseColor(Entry.Value, _color);
+                this.Hex = ColorToHex(Color);
 
-                Plugin.LogDebug($"Color parsed: {entry.Definition.Key}, color: {this.color}, hex: {this.hex}");
+                Plugin.LogDebug($"Color parsed: {Entry.Definition.Key}, color: {this.Color}, hex: {this.Hex}");
             }
         }
 
         public static void Init(ConfigFile config)
         {
-            includeCollector = config.Bind(
+            IncludeCollector = config.Bind(
                 "1. General",
                 "Include Collector quest (Fence)",
                 true,
@@ -77,7 +77,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            includeNonFir = config.Bind(
+            IncludeNonFir = config.Bind(
                 "1. General",
                 "Include non-FiR quest",
                 true,
@@ -87,7 +87,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            includeLoyaltyRegain = config.Bind(
+            IncludeLoyaltyRegain = config.Bind(
                 "1. General",
                 "Include loyalty regain quests",
                 false,
@@ -97,7 +97,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            hideFulfilled = config.Bind(
+            HideFulfilled = config.Bind(
                 "1. General",
                 "Hide checkmark if have enough (in raid)",
                 false,
@@ -108,7 +108,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            includeRaidItems = config.Bind(
+            IncludeRaidItems = config.Bind(
                 "1. General",
                 "Include items in PMC inventory (in raid)",
                 false,
@@ -118,7 +118,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            checkmarkColor = config.BindColor(
+            CheckmarkColor = config.BindColor(
                 "2. Colors",
                 "Checkmark color",
                 "#bf00ff",
@@ -126,7 +126,7 @@ namespace AllQuestsCheckmarks.Helpers
                 199
             );
 
-            nonFirColor = config.BindColor(
+            NonFirColor = config.BindColor(
                 "2. Colors",
                 "Checkmark color (non-FIR)",
                 "#73264d",
@@ -134,7 +134,7 @@ namespace AllQuestsCheckmarks.Helpers
                 198
             );
 
-            collectorColor = config.BindColor(
+            CollectorColor = config.BindColor(
                 "2. Colors",
                 "Collector color",
                 "#bf00ff",
@@ -142,7 +142,7 @@ namespace AllQuestsCheckmarks.Helpers
                 197
             );
 
-            markEnoughItems = config.Bind(
+            MarkEnoughItems = config.Bind(
                 "2. Colors",
                 "Use different color if have enough",
                 false,
@@ -153,7 +153,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            enoughItemsColor = config.BindColor(
+            EnoughItemsColor = config.BindColor(
                 "2. Colors",
                 "Have enough color",
                 "#00ff00",
@@ -161,7 +161,7 @@ namespace AllQuestsCheckmarks.Helpers
                 194
             );
 
-            useCustomQuestColor = config.Bind(
+            UseCustomQuestColor = config.Bind(
                 "2. Colors",
                 "Use custom quest checkmark color",
                 false,
@@ -171,7 +171,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            customQuestColor = config.BindColor(
+            CustomQuestColor = config.BindColor(
                 "2. Colors",
                 "Custom quest color",
                 "#ffeb6d",
@@ -179,7 +179,7 @@ namespace AllQuestsCheckmarks.Helpers
                 192
             );
 
-            bulletPoint = config.Bind(
+            BulletPoints = config.Bind(
                 "3. Text",
                 "Use bullet points",
                 true,
@@ -189,7 +189,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            customTextColors = config.Bind(
+            CustomTextColors = config.Bind(
                 "3. Text",
                 "Use custom text colors",
                 false,
@@ -199,7 +199,7 @@ namespace AllQuestsCheckmarks.Helpers
                 )
             );
 
-            activeQuestTextColor = config.BindColor(
+            ActiveQuestTextColor = config.BindColor(
                 "3. Text",
                 "Custom text color - active quests",
                 "#dd831a",
@@ -207,7 +207,7 @@ namespace AllQuestsCheckmarks.Helpers
                 297
             );
 
-            futureQuestTextColor = config.BindColor(
+            FutureQuestTextColor = config.BindColor(
                 "3. Text",
                 "Custom text color - future quests",
                 "#d24dff",
@@ -217,7 +217,7 @@ namespace AllQuestsCheckmarks.Helpers
 
             if (Plugin.isFikaInstalled)
             {
-                squadQuests = config.Bind(
+                SquadQuests = config.Bind(
                     "1. General",
                     "Mark squad members quests",
                     true,
@@ -227,7 +227,7 @@ namespace AllQuestsCheckmarks.Helpers
                     )
                 );
 
-                squadColor = config.BindColor(
+                SquadColor = config.BindColor(
                     "2. Colors",
                     "Checkmark color (squad members)",
                     "#ff3333",
@@ -235,7 +235,7 @@ namespace AllQuestsCheckmarks.Helpers
                     196
                 );
 
-                squadQuestTextColor = config.BindColor(
+                SquadQuestTextColor = config.BindColor(
                     "3. Text",
                     "Custom text color - squad quests",
                     "#ffc299",
@@ -244,14 +244,14 @@ namespace AllQuestsCheckmarks.Helpers
                 );
             }
 
-            showDebug = config.Bind(
+            ShowDebug = config.Bind(
                 "9. Debug",
                 "Debug logs",
                 false,
                 "Log debug info to Player.log"
             );
 
-            foreach(ColorEntry color in allColors)
+            foreach(ColorEntry color in _allColors)
             {
                 color.Parse();
             }

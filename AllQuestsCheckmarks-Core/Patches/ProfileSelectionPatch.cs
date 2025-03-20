@@ -11,7 +11,7 @@ namespace AllQuestsCheckmarks.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Class301.Class1438), nameof(Class301.Class1438.method_0));
+            return AccessTools.Method(typeof(Class303.Class1470), nameof(Class303.Class1470.method_0));
         }
 
         [PatchPostfix]

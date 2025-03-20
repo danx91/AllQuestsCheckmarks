@@ -1,7 +1,7 @@
 {
     "name": "all-quests-checkmarks",
-    "version": "1.1.0",
-    "sptVersion": "3.10.5",
+    "version": "1.2.0",
+    "sptVersion": "~3.11",
     "loadBefore": [],
     "loadAfter": [],
     "incompatibilities": [],

@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Reflection;
+using System;
 
 using BepInEx;
 using BepInEx.Logging;
@@ -10,8 +12,8 @@ using AllQuestsCheckmarks.Patches;
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.1.0"),
-        BepInDependency("com.SPT.core", "3.10.5"),
+        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.0"),
+        BepInDependency("com.SPT.core", "3.11.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
         BepInIncompatibility("VIP.TommySoucy.MoreCheckmarks")
     ]
@@ -25,15 +27,15 @@ namespace AllQuestsCheckmarks
         {
             LogSource = Logger;
             isFikaInstalled = Chainloader.PluginInfos.ContainsKey("com.fika.core");
-            modPath = Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(Plugin)).Location);
+            modPath = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Plugin)).Location);
             modPath.Replace("\\", "/");
 
             Settings.Init(Config);
             Assets.LoadAssets();
 
-            if (isFikaInstalled)
+            if (isFikaInstalled && TryInitFika())
             {
-                FikaEventSubscriber.Init();
+                FikaBridge.Init();
             }
             else
             {
@@ -49,9 +51,28 @@ namespace AllQuestsCheckmarks
             LogSource.LogInfo($"AllQuestCheckmarks by ZGFueDkx version {Info.Metadata.Version} started");
         }
 
+        private static bool TryInitFika()
+        {
+            try
+            {
+                Assembly assembly = Assembly.Load("AllQuestsCheckmarks-Fika");
+                Type main = assembly.GetType("AllQuestsCheckmarks.Fika.Main");
+                MethodInfo init = main.GetMethod("Init");
+
+                init.Invoke(main, null);
+            }
+            catch (Exception e)
+            {
+                LogSource.LogError($"Failed to load AllQuestsCheckmarks-Fika.dll! : {e}");
+                return false;
+            }
+
+            return true;
+        }
+
         public static void LogDebug(string msg)
         {
-            if (!Settings.showDebug.Value)
+            if (!Settings.ShowDebug.Value)
             {
                 return;
             }

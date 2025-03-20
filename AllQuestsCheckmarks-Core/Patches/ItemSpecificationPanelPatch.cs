@@ -18,7 +18,7 @@ namespace AllQuestsCheckmarks.Patches
         [PatchPrefix]
         static bool Prefix(ref QuestItemViewPanel ____questItemViewPanel)
         {
-            if (Assets.checkmark == null || ____questItemViewPanel == null)
+            if (Assets.Checkmark == null || ____questItemViewPanel == null)
             {
                 return true;
             }
@@ -26,7 +26,7 @@ namespace AllQuestsCheckmarks.Patches
             try
             {
                 FieldInfo info = typeof(QuestItemViewPanel).GetField("_foundInRaidSprite", BindingFlags.NonPublic | BindingFlags.Instance);
-                info.SetValue(____questItemViewPanel, Assets.checkmark);
+                info.SetValue(____questItemViewPanel, Assets.Checkmark);
             }
             catch
             {

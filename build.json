@@ -1,0 +1,22 @@
+{
+	"info":{
+		"name": "allquestscheckmarks",
+		"version": "1.2.0",
+		"spt": "3.11"
+	},
+	"dest": {
+		"client": "BepInEx/plugins/AllQuestsCheckmarks/",
+		"server": "user/mods/zgfuedkx-allquestscheckmarks/"
+	},
+	"files": {
+		"AllQuestsCheckmarks-Server/package.json": "server",
+		"AllQuestsCheckmarks-Server/src": "server",
+		"AllQuestsCheckmarks-Core/bin/Release/AllQuestsCheckmarks.dll": "client",
+		"AllQuestsCheckmarks-Fika/bin/Release/AllQuestsCheckmarks-Fika.dll": "client",
+		"AllQuestsCheckmarks-Core/locales": "client",
+		"AllQuestsCheckmarks-Core/Assets/AllQuestsCheckmarksAssets": "client"
+	},
+	"ignore": [
+		"**/*.md"
+	]
+}

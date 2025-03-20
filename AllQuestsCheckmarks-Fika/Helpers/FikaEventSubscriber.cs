@@ -5,7 +5,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 
-namespace AllQuestsCheckmarks.Helpers
+using AllQuestsCheckmarks.Helpers;
+
+namespace AllQuestsCheckmarks.Fika.Helpers
 {
     internal static class FikaEventSubscriber
     {
@@ -21,13 +23,13 @@ namespace AllQuestsCheckmarks.Helpers
                     return;
                 }
 
-                List<CoopPlayer> players = new List<CoopPlayer>();
+                Dictionary<string, string> players = new Dictionary<string, string>();
 
                 foreach(CoopPlayer player in coopHandler.HumanPlayers)
                 {
                     if(player != coopHandler.MyPlayer)
                     {
-                        players.Add(player);
+                        players.Add(player.ProfileId, player.Profile.Nickname);
                     }
                 }
 
@@ -36,19 +38,19 @@ namespace AllQuestsCheckmarks.Helpers
                     return;
                 }
 
-                SquadQuests.LoadData(players);
+                FikaBridge.InvokeCoopPlayersEvent(players);
             });
 
             FikaEventDispatcher.SubscribeEvent((FikaGameEndedEvent e) =>
             {
                 Plugin.LogDebug("Fika Game Ended");
-                SquadQuests.ClearSquadQuests();
+                FikaBridge.InvokeRaidFinishedEvent();
             });
 
             FikaEventDispatcher.SubscribeEvent((FikaGameCreatedEvent e) =>
             {
                 Plugin.LogDebug("Fika Game Created");
-                QuestsHelper.BuildItemsCache();
+                FikaBridge.InvokeBuildCacheEvent();
             });
         }
     }

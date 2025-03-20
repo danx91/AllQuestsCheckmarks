@@ -118,6 +118,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\..\BepInEx\plugins\AllQuestsCheckmarks\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>set "dest=$(ProjectDir)..\..\..\BepInEx\plugins\AllQuestsCheckmarks"
+if not exist "%25dest%25\" mkdir "%25dest%25\"
+copy "$(TargetPath)" "%25dest%25\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

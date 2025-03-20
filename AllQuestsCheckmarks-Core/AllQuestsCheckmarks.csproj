@@ -129,8 +129,12 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\..\BepInEx\plugins\$(TargetName)\$(TargetFileName)"
-copy "$(ProjectDir)\Assets\$(TargetName)Assets" "$(ProjectDir)\..\..\..\BepInEx\plugins\$(TargetName)\$(TargetName)Assets"
-copy "$(ProjectDir)\locales\" "$(ProjectDir)\..\..\..\BepInEx\plugins\$(TargetName)\locales\"</PostBuildEvent>
+    <PostBuildEvent>set "dest=$(ProjectDir)..\..\..\BepInEx\plugins\$(TargetName)"
+set "dest_locales=%25dest%25\locales"
+if not exist "%25dest%25\" mkdir "%25dest%25\"
+if not exist "%25dest_locales%25" mkdir "%25dest_locales%25"
+copy "$(TargetPath)" "%25dest%25\$(TargetFileName)"
+copy "$(ProjectDir)\Assets\$(TargetName)Assets" "%25dest%25\$(TargetName)Assets"
+copy "$(ProjectDir)\locales\" "%25dest_locales%25\"</PostBuildEvent>
   </PropertyGroup>
 </Project>

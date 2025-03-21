@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -11,6 +12,11 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void Init()
         {
+            if (!TryInitFika())
+            {
+                return;
+            }
+
             RaidFinishedEvent += SquadQuests.ClearSquadQuests;
             BuildCacheEvent += QuestsHelper.BuildItemsCache;
             CoopPlayersEvent += SquadQuests.LoadData;
@@ -32,6 +38,25 @@ namespace AllQuestsCheckmarks.Helpers
         {
             Plugin.LogDebug("InvokeBuildCacheEvent");
             BuildCacheEvent.Invoke();
+        }
+
+        private static bool TryInitFika()
+        {
+            try
+            {
+                Assembly assembly = Assembly.Load("AllQuestsCheckmarks-Fika");
+                Type main = assembly.GetType("AllQuestsCheckmarks.Fika.Main");
+                MethodInfo init = main.GetMethod("Init");
+
+                init.Invoke(main, null);
+            }
+            catch (Exception e)
+            {
+                Plugin.LogSource.LogError($"Failed to load AllQuestsCheckmarks-Fika.dll! : {e}");
+                return false;
+            }
+
+            return true;
         }
     }
 }

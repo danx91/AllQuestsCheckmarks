@@ -24,7 +24,10 @@ namespace AllQuestsCheckmarks.Patches
             return AccessTools.Method(typeof(QuestItemViewPanel), nameof(QuestItemViewPanel.Show));
         }
 
-        [PatchPrefix]
+        [
+            PatchPrefix,
+            HarmonyAfter("VIP.TommySoucy.MoreCheckmarks")
+        ]
         static bool Prefix(Profile profile, Item item, [CanBeNull] SimpleTooltip tooltip, QuestItemViewPanel __instance, Image ____questIconImage,
             Sprite ____foundInRaidSprite, Sprite ____questItemSprite, ref string ___string_5, ref SimpleTooltip ___simpleTooltip_0, TextMeshProUGUI ____questItemLabel)
         {
@@ -180,6 +183,51 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
+            bool neededForHideout = false;
+            bool neededForBarter = false;
+
+            string hideoutTooltip = "";
+            string barterTooltip = "";
+
+            if (Plugin.isMoreCheckmarksInstalled)
+            {
+                if (Settings.MoreCheckmarksHideout.Value
+                    && MoreCheckmarksBridge.InvokeGetHideoutAreasEvent(item.TemplateId, out int hideoutNeeded, out List<string> areas))
+                {
+                    neededForHideout = true;
+                    hideoutTooltip = "\n" + string.Format("aqc_hideout".Localized(null), hideoutNeeded);
+
+                    if(Settings.MoreCheckmarksHideoutIncludeTotal.Value)
+                    {
+                        //TODO: make money non-fir
+                        totalNeededFir += hideoutNeeded;
+                    }
+
+                    foreach(string area in areas)
+                    {
+                        hideoutTooltip += $"\n{indent}{area}";
+                    }
+                }
+
+                if(Settings.MoreCheckmarksBarters.Value
+                    && MoreCheckmarksBridge.InvokeGetBartersEvent(item.TemplateId, out List<MoreCheckmarksBridge.TraderBarters> traders))
+                {
+                    neededForBarter = true;
+                    barterTooltip = "\n" + "aqc_barters".Localized(null);
+                    string barterColor = Settings.MoreCheckmarksBartersColor.Hex;
+
+                    foreach(MoreCheckmarksBridge.TraderBarters trader in traders)
+                    {
+                        barterTooltip += $"\n{indent}{trader.TraderName.Localized(null)}:";
+
+                        foreach(MoreCheckmarksBridge.BarterData barter in trader.Barters)
+                        {
+                            barterTooltip += $"\n  {indent}<color={barterColor}>{barter.BarterName.Localized(null)}</color>: {barter.Count}";
+                        }
+                    }
+                }
+            }
+
             if(totalNeededFir > 0 || showNonFir && totalNeededNonFir > 0)
             {
                 ___string_5 += "\n" + string.Format((showNonFir ? "aqc_total_needed_alt" : "aqc_total_needed").Localized(null),
@@ -201,11 +249,18 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
+            ___string_5 += hideoutTooltip + barterTooltip;
+
             int leftFir = inStash.Fir - totalNeededFir;
             switch(QuestsHelper.GetCheckmarkStatus(neededForActive, neededForFuture, neededForFriend, item.MarkedAsSpawnedInSession,
                 leftFir >= 0 && inStash.NonFir + leftFir - totalNeededNonFir >= 0, collectorOnly))
             {
                 case QuestsHelper.ECheckmarkStatus.Fir:
+                    if(neededForHideout || neededForBarter && Settings.MoreCheckmarksBartersCheckmark.Value)
+                    {
+                        goto case QuestsHelper.ECheckmarkStatus.None;
+                    }
+
                     QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
                     break;
                 case QuestsHelper.ECheckmarkStatus.Active:
@@ -231,57 +286,17 @@ namespace AllQuestsCheckmarks.Patches
                 case QuestsHelper.ECheckmarkStatus.Collector:
                     QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.CollectorColor.Color);
                     break;
-            }
-
-            /*if ((neededForActive || neededForFuture) && totalNeededFir - inStash.fir <= 0 && totalNeededNonFir - inStash.nonFir <= 0)
-            {
-                if (Settings.hideFulfilled.Value && QuestsHelper.IsInRaid())
-                {
-                    if (item.MarkedAsSpawnedInSession)
+                case QuestsHelper.ECheckmarkStatus.None:
+                    if (neededForHideout)
                     {
-                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.MoreCheckmarksHideoutColor.Color);
                     }
-
-                    return false;
-                }
-                else if (Settings.markEnoughItems.Value)
-                {
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.enoughItemsColor.color);
-                    return false;
-                }
+                    else if (neededForBarter && Settings.MoreCheckmarksBartersCheckmark.Value)
+                    {
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.MoreCheckmarksBartersColor.Color);
+                    }
+                    break;
             }
-
-            if (neededForActive)
-            {
-                if (Settings.useCustomQuestColor.Value)
-                {
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.customQuestColor.color);
-                }
-                else
-                {
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____questItemSprite, QuestsHelper.DEFAULT_COLOR);
-                }
-            }
-            else if(neededForFuture)
-            {
-                if (collectorOnly)
-                {
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.collectorColor.color);
-                }
-                else
-                {
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite,
-                        item.MarkedAsSpawnedInSession ? Settings.checkmarkColor.color : Settings.nonFirColor.color);
-                }
-            }
-            else if(neededForFriend)
-            {
-                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.squadColor.color);
-            }
-            else if (item.MarkedAsSpawnedInSession)
-            {
-                QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, QuestsHelper.DEFAULT_COLOR);
-            }*/
 
             return false;
         }

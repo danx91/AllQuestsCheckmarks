@@ -1,7 +1,7 @@
 {
 	"info":{
 		"name": "allquestscheckmarks",
-		"version": "1.2.0",
+		"version": "1.2.1-pre0",
 		"spt": "3.11"
 	},
 	"dest": {
@@ -13,6 +13,7 @@
 		"AllQuestsCheckmarks-Server/src": "server",
 		"AllQuestsCheckmarks-Core/bin/Release/AllQuestsCheckmarks.dll": "client",
 		"AllQuestsCheckmarks-Fika/bin/Release/AllQuestsCheckmarks-Fika.dll": "client",
+		"AllQuestsCheckmarks-MoreCheckmarks/bin/Release/AllQuestsCheckmarks-MoreCheckmarks.dll": "client",
 		"AllQuestsCheckmarks-Core/locales": "client",
 		"AllQuestsCheckmarks-Core/Assets/AllQuestsCheckmarksAssets": "client"
 	},

@@ -9,37 +9,63 @@ using BepInEx.Bootstrap;
 using AllQuestsCheckmarks.Helpers;
 using AllQuestsCheckmarks.Patches;
 
+/* TODO:
+ *  MoreCheckmarks compat
+ *  Update on take item - like quests
+ *  Show in take action menu
+ *  
+ * FIX:
+ *  LeaveItem not shown as active quest
+ *  Item condition - durability
+ *  Multiple of same item (Sew it good)
+ *  
+ * TEST:
+ *  Hide chemark fulfilled - respect squad OK
+ *  
+ * DONE:
+ * 
+ */
+
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.0"),
+        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.1"),
         BepInDependency("com.SPT.core", "3.11.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
-        BepInIncompatibility("VIP.TommySoucy.MoreCheckmarks")
+        BepInDependency("VIP.TommySoucy.MoreCheckmarks", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource;
         public static bool isFikaInstalled = false;
+        public static bool isMoreCheckmarksInstalled = false;
         public static string modPath;
 
         public void Awake()
         {
             LogSource = Logger;
-            isFikaInstalled = Chainloader.PluginInfos.ContainsKey("com.fika.core");
+
             modPath = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Plugin)).Location);
             modPath.Replace("\\", "/");
+
+            isFikaInstalled = Chainloader.PluginInfos.ContainsKey("com.fika.core");
+            isMoreCheckmarksInstalled = Chainloader.PluginInfos.ContainsKey("VIP.TommySoucy.MoreCheckmarks");
 
             Settings.Init(Config);
             Assets.LoadAssets();
 
-            if (isFikaInstalled && TryInitFika())
+            if (isFikaInstalled)
             {
                 FikaBridge.Init();
             }
             else
             {
                 new LocalGameStartPatch().Enable();
+            }
+
+            if (isMoreCheckmarksInstalled)
+            {
+                MoreCheckmarksBridge.Init();
             }
 
             new QuestClassPatch().Enable();
@@ -49,25 +75,6 @@ namespace AllQuestsCheckmarks
             new UpdateApplicationLanguagePatch().Enable();
 
             LogSource.LogInfo($"AllQuestCheckmarks by ZGFueDkx version {Info.Metadata.Version} started");
-        }
-
-        private static bool TryInitFika()
-        {
-            try
-            {
-                Assembly assembly = Assembly.Load("AllQuestsCheckmarks-Fika");
-                Type main = assembly.GetType("AllQuestsCheckmarks.Fika.Main");
-                MethodInfo init = main.GetMethod("Init");
-
-                init.Invoke(main, null);
-            }
-            catch (Exception e)
-            {
-                LogSource.LogError($"Failed to load AllQuestsCheckmarks-Fika.dll! : {e}");
-                return false;
-            }
-
-            return true;
         }
 
         public static void LogDebug(string msg)

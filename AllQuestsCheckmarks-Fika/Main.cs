@@ -2,7 +2,7 @@
 
 namespace AllQuestsCheckmarks.Fika
 {
-    internal class Main
+    internal static class Main
     {
         public static void Init()
         {

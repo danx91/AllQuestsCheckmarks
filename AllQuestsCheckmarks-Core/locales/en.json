@@ -6,5 +6,8 @@
 	"aqc_future_quests": "Future quests:",
 	"aqc_fir": "FiR",
 	"aqc_nonfir": "Non-FiR",
-	"aqc_squad_quests": "Required for squad:"
+	"aqc_squad_quests": "Required for squad:",
+	"aqc_hideout": "Hideout upgrades ({0}):",
+	"aqc_barters": "Barters:",
+	"aqc_custom_trader": "Custom trader"
 }

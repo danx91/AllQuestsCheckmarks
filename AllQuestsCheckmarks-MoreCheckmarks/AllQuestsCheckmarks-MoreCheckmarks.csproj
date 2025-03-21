@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4644BABF-09E8-4E27-B375-E955377AC32D}</ProjectGuid>
+    <ProjectGuid>{52610D18-EE50-4355-862B-7B1498DFCACD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AllQuestsCheckmarks</RootNamespace>
-    <AssemblyName>AllQuestsCheckmarks</AssemblyName>
+    <RootNamespace>AllQuestsCheckmarks_MoreCheckmarks</RootNamespace>
+    <AssemblyName>AllQuestsCheckmarks-MoreCheckmarks</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -30,10 +30,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AllQuestsCheckmarks">
+      <HintPath>..\..\..\BepInEx\plugins\AllQuestsCheckmarks\AllQuestsCheckmarks.dll</HintPath>
+    </Reference>
+    <Reference Include="MoreCheckmarks">
+      <HintPath>..\..\..\BepInEx\plugins\MoreCheckmarks\MoreCheckmarks.dll</HintPath>
+    </Reference>
     <Reference Include="PhysicsModule">
       <HintPath>..\..\..\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
@@ -109,33 +112,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationManagerAttributes.cs" />
-    <Compile Include="Helpers\Assets.cs" />
-    <Compile Include="Helpers\MoreCheckmarksBridge.cs" />
-    <Compile Include="Helpers\FikaBridge.cs" />
-    <Compile Include="Helpers\SquadQuests.cs" />
-    <Compile Include="Helpers\Locales.cs" />
-    <Compile Include="Helpers\QuestsHelper.cs" />
-    <Compile Include="Helpers\QuestsData.cs" />
-    <Compile Include="Helpers\Settings.cs" />
-    <Compile Include="Patches\ItemSpecificationPanelPatch.cs" />
-    <Compile Include="Patches\LocalGameStartPatch.cs" />
-    <Compile Include="Patches\UpdateApplicationLanguagePatch.cs" />
-    <Compile Include="Patches\ProfileSelectionPatch.cs" />
-    <Compile Include="Patches\QuestClassPatch.cs" />
-    <Compile Include="Patches\QuestItemViewPanelPatch.cs" />
-    <Compile Include="Plugin.cs" />
+    <Compile Include="Helpers\MoreCheckmarksHelper.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set "dest=$(ProjectDir)..\..\..\BepInEx\plugins\$(TargetName)"
-set "dest_locales=%25dest%25\locales"
+    <PostBuildEvent>set "dest=$(ProjectDir)..\..\..\BepInEx\plugins\AllQuestsCheckmarks"
 if not exist "%25dest%25\" mkdir "%25dest%25\"
-if not exist "%25dest_locales%25" mkdir "%25dest_locales%25"
-copy "$(TargetPath)" "%25dest%25\$(TargetFileName)"
-copy "$(ProjectDir)\Assets\$(TargetName)Assets" "%25dest%25\$(TargetName)Assets"
-copy "$(ProjectDir)\locales\" "%25dest_locales%25\"</PostBuildEvent>
+copy "$(TargetPath)" "%25dest%25\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

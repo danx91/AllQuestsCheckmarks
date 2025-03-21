@@ -21,6 +21,10 @@ namespace AllQuestsCheckmarks.Helpers
         public static ConfigEntry<bool> UseCustomQuestColor;
         public static ConfigEntry<bool> BulletPoints;
         public static ConfigEntry<bool> CustomTextColors;
+        public static ConfigEntry<bool> MoreCheckmarksHideout;
+        public static ConfigEntry<bool> MoreCheckmarksHideoutIncludeTotal;
+        public static ConfigEntry<bool> MoreCheckmarksBarters;
+        public static ConfigEntry<bool> MoreCheckmarksBartersCheckmark;
         public static ConfigEntry<bool> ShowDebug;
 
         public static ColorEntry CheckmarkColor;
@@ -32,6 +36,8 @@ namespace AllQuestsCheckmarks.Helpers
         public static ColorEntry ActiveQuestTextColor;
         public static ColorEntry FutureQuestTextColor;
         public static ColorEntry SquadQuestTextColor;
+        public static ColorEntry MoreCheckmarksHideoutColor;
+        public static ColorEntry MoreCheckmarksBartersColor;
 
         public class ColorEntry
         {
@@ -241,6 +247,65 @@ namespace AllQuestsCheckmarks.Helpers
                     "#ffc299",
                     "Custom color of squad quests text",
                     295
+                );
+            }
+
+            if (Plugin.isMoreCheckmarksInstalled)
+            {
+                MoreCheckmarksHideout = config.Bind(
+                    "4. MoreCheckmarks",
+                    "Include hideout upgrades",
+                    true,
+                    MakeDescription(
+                        "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod",
+                        399
+                    )
+                );
+
+                MoreCheckmarksHideoutIncludeTotal = config.Bind(
+                    "4. MoreCheckmarks",
+                    "Include hideout upgrades in Total needed",
+                    true,
+                    MakeDescription(
+                        "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod in 'Total needed' count",
+                        398
+                    )
+                );
+
+                MoreCheckmarksHideoutColor = config.BindColor(
+                    "4. MoreCheckmarks",
+                    "Hideout upgrades color",
+                    "#0000ff",
+                    "Color of checkmark for items required for hideout upgrades",
+                    397
+                );
+
+                MoreCheckmarksBarters = config.Bind(
+                   "4. MoreCheckmarks",
+                   "Include barters",
+                   true,
+                   MakeDescription(
+                       "Whether or not to include items required for barters from MoreCheckmarks mod",
+                       396
+                   )
+                );
+
+                MoreCheckmarksBartersCheckmark = config.Bind(
+                   "4. MoreCheckmarks",
+                   "Show checkmark for barter items",
+                   true,
+                   MakeDescription(
+                       "Whether or not to show checkmark for barter items from MoreCheckmarks mod",
+                       395
+                   )
+                );
+
+                MoreCheckmarksBartersColor = config.BindColor(
+                    "4. MoreCheckmarks",
+                    "Barter color",
+                    "#00ffff",
+                    "Color of checkmark for items required for barters",
+                    394
                 );
             }
 

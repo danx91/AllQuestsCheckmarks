@@ -1,10 +1,10 @@
 {
-	"aqc_in_stash": "В схроне: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> с рейда)",
+	"aqc_in_stash": "В схроне: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> из рейда)",
 	"aqc_total_needed": "Всего нужно: <color=#FFFF66>{0}</color>",
-	"aqc_total_needed_alt": "Всего нужно: <color=#FFFF66>{0}</color> с рейда, <color=#FF6666>{1}</color> не с рейда",
+	"aqc_total_needed_alt": "Всего нужно: <color=#FFFF66>{0}</color> из рейда, <color=#FF6666>{1}</color> не из рейда",
 	"aqc_active_quests": "Активные задания:",
 	"aqc_future_quests": "Будущие задания:",
-	"aqc_fir": "С рейда",
-	"aqc_nonfir": "Не с рейда",
-	"aqc_squad_quests": "Требуется для отряда:"
+	"aqc_fir": "Из рейда",
+	"aqc_nonfir": "Не из рейда",
+	"aqc_squad_quests": "Требуется для команды:"
 }

@@ -9,23 +9,6 @@ using BepInEx.Bootstrap;
 using AllQuestsCheckmarks.Helpers;
 using AllQuestsCheckmarks.Patches;
 
-/* TODO:
- *  MoreCheckmarks compat
- *  Update on take item - like quests
- *  Show in take action menu
- *  
- * FIX:
- *  LeaveItem not shown as active quest
- *  Item condition - durability
- *  Multiple of same item (Sew it good)
- *  
- * TEST:
- *  Hide chemark fulfilled - respect squad OK
- *  
- * DONE:
- * 
- */
-
 namespace AllQuestsCheckmarks
 {
     [

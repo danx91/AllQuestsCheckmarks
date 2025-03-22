@@ -18,7 +18,7 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             RaidFinishedEvent += SquadQuests.ClearSquadQuests;
-            BuildCacheEvent += QuestsHelper.BuildItemsCache;
+            BuildCacheEvent += StashHelper.BuildItemsCache;
             CoopPlayersEvent += SquadQuests.LoadData;
         }
 

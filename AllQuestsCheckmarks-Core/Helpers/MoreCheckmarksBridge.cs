@@ -42,13 +42,11 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static bool InvokeGetHideoutAreasEvent(string itemId, out int needed, out List<string> areaNames)
         {
-            Plugin.LogDebug("InvokeGetHideoutAreasEvent");
             return GetHideoutAreasEvent.Invoke(itemId, out needed, out areaNames);
         }
 
         public static bool InvokeGetBartersEvent(string itemId, out List<TraderBarters> traders)
         {
-            Plugin.LogDebug("InvokeGetBartersEvent");
             return GetBartersEvent.Invoke(itemId, out traders);
         }
 

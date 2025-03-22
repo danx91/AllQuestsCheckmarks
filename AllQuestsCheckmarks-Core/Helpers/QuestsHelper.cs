@@ -6,7 +6,6 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using EFT.UI.DragAndDrop;
-using SPT.Reflection.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,8 +38,6 @@ namespace AllQuestsCheckmarks.Helpers
             "59c9392986f7742f6923add2", // Trust Regain (Therapist)
         };
 
-        private static readonly Dictionary<string, ItemsCount> _itemsCache = new Dictionary<string, ItemsCount>();
-
         public enum ECheckmarkStatus
         {
             None = 0,
@@ -50,19 +47,6 @@ namespace AllQuestsCheckmarks.Helpers
             Squad = 4,
             Fulfilled = 5,
             Collector = 6
-        }
-
-        public class ItemsCount
-        {
-            public int Fir = 0;
-            public int NonFir = 0;
-            public int Total
-            {
-                get
-                {
-                    return Fir + NonFir;
-                }
-            }
         }
 
         public class CurrentQuest
@@ -75,94 +59,6 @@ namespace AllQuestsCheckmarks.Helpers
                 this.Template = template;
                 this.Condition = condition;
             }
-        }
-
-        public static ItemsCount GetItemsInStash(string itemId)
-        {
-            ItemsCount itemsCount = new ItemsCount();
-
-            Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
-            IEnumerable<Item> items;
-
-            if (IsInRaid())
-            {
-                if (_itemsCache != null && _itemsCache.TryGetValue(itemId, out ItemsCount cached))
-                {
-                    itemsCount.Fir += cached.Fir;
-                    itemsCount.NonFir += cached.NonFir;
-                }
-
-                if (!Settings.IncludeRaidItems.Value)
-                {
-                    return itemsCount;
-                }
-
-                items = profile.Inventory.GetPlayerItems(EPlayerItems.Equipment | EPlayerItems.QuestItems).Where(i => i.TemplateId == itemId);
-            }
-            else
-            {
-                items = profile.Inventory.GetPlayerItems(EPlayerItems.All).Where(i => i.TemplateId == itemId);
-            }
-
-            foreach (Item item in items)
-            {
-                if (item.MarkedAsSpawnedInSession)
-                {
-                    itemsCount.Fir += item.StackObjectsCount;
-                }
-                else
-                {
-                    itemsCount.NonFir += item.StackObjectsCount;
-                }
-            }
-
-            return itemsCount;
-        }
-
-        public static void BuildItemsCache()
-        {
-            _itemsCache.Clear();
-
-            Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
-            IEnumerable<Item> itemsToCache = profile.Inventory.GetPlayerItems(EPlayerItems.HideoutStashes);
-            IEnumerable<Item> stashItems = Singleton<HideoutClass>.Instance?.AllStashItems;
-            
-            if(stashItems != null)
-            {
-                itemsToCache = itemsToCache.Concat(stashItems);
-            }
-
-            foreach(Item item in itemsToCache)
-            {
-                if(_itemsCache.TryGetValue(item.TemplateId, out ItemsCount itemsCount))
-                {
-                    if (item.MarkedAsSpawnedInSession)
-                    {
-                        itemsCount.Fir += item.StackObjectsCount;
-                    }
-                    else
-                    {
-                        itemsCount.NonFir += item.StackObjectsCount;
-                    }
-                }
-                else
-                {
-                    ItemsCount count = new ItemsCount();
-
-                    if (item.MarkedAsSpawnedInSession)
-                    {
-                        count.Fir = item.StackObjectsCount;
-                    }
-                    else
-                    {
-                        count.NonFir = item.StackObjectsCount;
-                    }
-
-                    _itemsCache.Add(item.TemplateId, count);
-                }
-            }
-
-            Plugin.LogSource.LogInfo($"Items cache built. Total items in cache: {_itemsCache.Count}");
         }
 
         public static bool IsInRaid()

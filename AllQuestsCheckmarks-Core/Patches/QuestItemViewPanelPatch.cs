@@ -51,7 +51,7 @@ namespace AllQuestsCheckmarks.Patches
             }
 
             bool showNonFir = Settings.IncludeNonFir.Value;
-            QuestsHelper.ItemsCount inStash = QuestsHelper.GetItemsInStash(item.TemplateId);
+            StashHelper.ItemsCount inStash = StashHelper.GetItemsInStash(item.TemplateId);
             ___string_5 += string.Format("aqc_in_stash".Localized(null), inStash.Total, inStash.Fir);
 
             bool neededForActive = false;

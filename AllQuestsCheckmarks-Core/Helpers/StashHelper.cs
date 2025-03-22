@@ -10,6 +10,13 @@ namespace AllQuestsCheckmarks.Helpers
 {
     class StashHelper
     {
+        public static readonly List<string> MoneyIds = new List<string>()
+        {
+            "5449016a4bdc2d6f028b456f", //Roubles
+            "5696686a4bdc2da3298b456a", //Dollars
+            "569668774bdc2da2298b4568", //Euros
+        };
+
         private static readonly Dictionary<string, ItemsCount> _itemsCache = new Dictionary<string, ItemsCount>();
 
         public class ItemsCount

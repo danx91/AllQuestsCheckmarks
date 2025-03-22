@@ -191,7 +191,7 @@ namespace AllQuestsCheckmarks.Patches
 
             if (Plugin.isMoreCheckmarksInstalled)
             {
-                if (Settings.MoreCheckmarksHideout.Value
+                if ((item.MarkedAsSpawnedInSession || StashHelper.MoneyIds.Contains(item.TemplateId)) && Settings.MoreCheckmarksHideout.Value
                     && MoreCheckmarksBridge.InvokeGetHideoutAreasEvent(item.TemplateId, out int hideoutNeeded, out List<string> areas))
                 {
                     neededForHideout = true;
@@ -199,8 +199,14 @@ namespace AllQuestsCheckmarks.Patches
 
                     if(Settings.MoreCheckmarksHideoutIncludeTotal.Value)
                     {
-                        //TODO: make money non-fir
-                        totalNeededFir += hideoutNeeded;
+                        if (StashHelper.MoneyIds.Contains(item.TemplateId))
+                        {
+                            totalNeededNonFir += hideoutNeeded;
+                        }
+                        else
+                        {
+                            totalNeededFir += hideoutNeeded;
+                        }
                     }
 
                     foreach(string area in areas)

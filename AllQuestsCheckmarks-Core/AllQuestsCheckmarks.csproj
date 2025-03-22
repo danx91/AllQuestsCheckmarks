@@ -118,6 +118,7 @@
     <Compile Include="Helpers\QuestsHelper.cs" />
     <Compile Include="Helpers\QuestsData.cs" />
     <Compile Include="Helpers\Settings.cs" />
+    <Compile Include="Helpers\StashHelper.cs" />
     <Compile Include="Patches\ItemSpecificationPanelPatch.cs" />
     <Compile Include="Patches\LocalGameStartPatch.cs" />
     <Compile Include="Patches\UpdateApplicationLanguagePatch.cs" />

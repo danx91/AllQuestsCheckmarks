@@ -19,7 +19,7 @@ namespace AllQuestsCheckmarks.Patches
         static void Postfix()
         {
             Plugin.LogDebug("Local game started");
-            QuestsHelper.BuildItemsCache();
+            StashHelper.BuildItemsCache();
         }
     }
 }

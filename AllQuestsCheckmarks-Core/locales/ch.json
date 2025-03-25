@@ -1,10 +1,13 @@
 {
 	"aqc_in_stash": "库存中: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> 战局中找到)",
-	"aqc_total_needed": "总计需要: <color=#FFFF66>{0}</color>",
-	"aqc_total_needed_alt": "总计需要: <color=#FFFF66>{0}</color> 战局中找到, <color=#FF6666>{1}</color> 非战局中找到",
+	"aqc_total_needed": "总共需要: <color=#FFFF66>{0}</color>",
+	"aqc_total_needed_alt": "总共需要: <color=#FFFF66>{0}</color> 战局中找到, <color=#FF6666>{1}</color> 非战局中找到",
 	"aqc_active_quests": "进行中的任务:",
-	"aqc_future_quests": "未来任务:",
+	"aqc_future_quests": "未来的任务:",
 	"aqc_fir": "战局中找到",
 	"aqc_nonfir": "非战局中找到",
-	"aqc_squad_quests": "小队任务需求:"
+	"aqc_squad_quests": "小队所需:",
+	"aqc_hideout": "藏身处升级 ({0}):",
+	"aqc_barters": "交易:",
+	"aqc_custom_trader": "自定义商人"
 }

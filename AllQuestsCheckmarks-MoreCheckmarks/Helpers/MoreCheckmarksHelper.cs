@@ -42,7 +42,7 @@ namespace AllQuestsCheckmarks.MoreCheckmarks.Helpers
                     continue;
                 }
 
-                TraderBarters trader = new TraderBarters(i <= traderIds.Count ? traderIds[i] + " Nickname" : "aqc_custom_trader");
+                TraderBarters trader = new TraderBarters(i < traderIds.Count ? traderIds[i] + " Nickname" : "aqc_custom_trader");
                 traders.Add(trader);
 
                 foreach (KeyValuePair<string, int> barter in bartersByTrader[i])

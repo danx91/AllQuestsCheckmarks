@@ -130,9 +130,11 @@ namespace AllQuestsCheckmarks.Helpers
                 }
             }
 
-            foreach(string questId in allQuestIds)
+            Dictionary<string, bool> cache = new Dictionary<string, bool>();
+
+            foreach (string questId in allQuestIds)
             {
-                if(IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds))
+                if(IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds, cache))
                 {
                     Plugin.LogDebug($"Quest {questId} is unreachable");
                     _unreachableQuests.Add(questId);
@@ -140,34 +142,53 @@ namespace AllQuestsCheckmarks.Helpers
             }
         }
 
-        private static bool IsQuestUnreachable(QuestRequirements requirements, List<string> unreachable, Dictionary<string, bool> cache = null)
+        private static bool IsQuestUnreachable(QuestRequirements requirements, List<string> unreachableRoot, Dictionary<string, bool> cache, Stack<string> stack = null)
         {
-            if(cache == null)
+            if(stack == null)
             {
-                cache = new Dictionary<string, bool>();
+                stack = new Stack<string>();
             }
 
-            if (unreachable.Contains(requirements.QuestId))
+            //Check for circular dependency - assume reachable
+            if (stack.Contains(requirements.QuestId))
             {
-                return true;
-            }
-            else if (requirements.List.Count == 0)
-            {
+                Plugin.LogDebug($"Circular dependency detected! Quest {requirements.QuestId} is already in stack!");
                 return false;
             }
+            //Root is unreachable - unreachable
+            else if (unreachableRoot.Contains(requirements.QuestId))
+            {
+                Plugin.LogDebug($"Quest {requirements.QuestId} has unreachable root quest!");
+                return true;
+            }
+            //Empty requirements - reachable
+            else if (requirements.List.Count == 0)
+            {
+                Plugin.LogDebug($"Quest {requirements.QuestId} has no requirements!");
+                return false;
+            }
+            //Already checked - return cached value
             else if (cache.TryGetValue(requirements.QuestId, out bool cached))
             {
+                Plugin.LogDebug($"Quest {requirements.QuestId} already checked - returning cached value ({cached})");
                 return cached;
             }
 
+            //Push current quest to stack before traversing list
+            stack.Push(requirements.QuestId);
+
+            //Traverse quest requirements list
             foreach (QuestRequirements req in requirements.List)
             {
-                if(IsQuestUnreachable(req, unreachable, cache))
+                if(IsQuestUnreachable(req, unreachableRoot, cache, stack))
                 {
                     cache.Add(requirements.QuestId, true);
                     return true;
                 }
             }
+
+            //Pop current quest from stack
+            stack.Pop();
 
             cache.Add(requirements.QuestId, false);
             return false;

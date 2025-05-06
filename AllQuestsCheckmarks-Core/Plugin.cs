@@ -11,7 +11,7 @@ using AllQuestsCheckmarks.Patches;
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.1"),
+        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.4"),
         BepInDependency("com.SPT.core", "3.11.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
         BepInDependency("VIP.TommySoucy.MoreCheckmarks", BepInDependency.DependencyFlags.SoftDependency)

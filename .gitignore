@@ -11,3 +11,5 @@ AllQuestsCheckmarks-Server/package-lock.json
 **/.vs/
 **/bin/
 **/obj/
+
+TODO.md

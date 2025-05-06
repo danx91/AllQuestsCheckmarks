@@ -136,7 +136,7 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
-            if (QuestsHelper.IsNeededForActiveOrFutureQuests(item, out QuestsData.ItemData itemData))
+            if (!Settings.OnlyActiveQuests.Value && QuestsHelper.IsNeededForActiveOrFutureQuests(item, out QuestsData.ItemData itemData))
             {
                 string futureColor = useCustomTextColors ? Settings.FutureQuestTextColor.Hex : "#d24dff";
 

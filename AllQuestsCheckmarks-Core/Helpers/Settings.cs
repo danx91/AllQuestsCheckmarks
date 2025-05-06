@@ -15,6 +15,7 @@ namespace AllQuestsCheckmarks.Helpers
         public static ConfigEntry<bool> IncludeLoyaltyRegain;
         public static ConfigEntry<bool> IncludeNonFir;
         public static ConfigEntry<bool> HideFulfilled;
+        public static ConfigEntry<bool> OnlyActiveQuests;
         public static ConfigEntry<bool> IncludeRaidItems;
         public static ConfigEntry<bool> SquadQuests;
         public static ConfigEntry<bool> MarkEnoughItems;
@@ -73,13 +74,20 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void Init(ConfigFile config)
         {
+            int generalIndex = 99;
+            int colorsIndex = 199;
+            int textIndex = 299;
+
+            /*
+             * GENERAL
+             */
             IncludeCollector = config.Bind(
                 "1. General",
                 "Include Collector quest (Fence)",
                 true,
                 MakeDescription(
                     "Whether or not to include items needed for Collector quest",
-                    99
+                    generalIndex--
                 )
             );
 
@@ -89,7 +97,7 @@ namespace AllQuestsCheckmarks.Helpers
                 true,
                 MakeDescription(
                     "Whether or not to include quests that don't require found in raid items",
-                    98
+                    generalIndex--
                 )
             );
 
@@ -99,7 +107,7 @@ namespace AllQuestsCheckmarks.Helpers
                 false,
                 MakeDescription(
                     "Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)",
-                    97
+                    generalIndex--
                 )
             );
 
@@ -110,7 +118,17 @@ namespace AllQuestsCheckmarks.Helpers
                 MakeDescription(
                     "Whether or not to hide checkmark in raid on items that you have enough for all active and future quests. Be careful when using with " +
                         "'Include items in PMC inventory (in raid)', as this combo may hide checkmarks while still in raid!",
-                    96
+                    generalIndex--
+                )
+            );
+
+            OnlyActiveQuests = config.Bind(
+                "1. General",
+                "Show only active quests",
+                false,
+                MakeDescription(
+                    "Whether or not to show only active quests (no future quests)",
+                    generalIndex--
                 )
             );
 
@@ -120,16 +138,19 @@ namespace AllQuestsCheckmarks.Helpers
                 false,
                 MakeDescription(
                     "Whether or not to include items in PMC inventory while in raid in 'In Stash' count",
-                    95
+                    generalIndex--
                 )
             );
 
+            /*
+             * COLORS
+             */
             CheckmarkColor = config.BindColor(
                 "2. Colors",
                 "Checkmark color",
                 "#bf00ff",
                 "Color of checkmark if item is not currently needed but is required for future quests",
-                199
+                colorsIndex--
             );
 
             NonFirColor = config.BindColor(
@@ -137,7 +158,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Checkmark color (non-FIR)",
                 "#73264d",
                 "Color of checkmark if non-FiR item is not currently needed but is required for future quests",
-                198
+                colorsIndex--
             );
 
             CollectorColor = config.BindColor(
@@ -145,7 +166,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Collector color",
                 "#bf00ff",
                 "Color of checkmark for collector quest",
-                197
+                colorsIndex--
             );
 
             MarkEnoughItems = config.Bind(
@@ -155,7 +176,7 @@ namespace AllQuestsCheckmarks.Helpers
                 MakeDescription(
                     "Whether or not to use different checkmark color if you have enough items for all quests. " +
                         "'Hide checkmark if have enough' option will hide this checkmark while in raid",
-                    195
+                    generalIndex--
                 )
             );
 
@@ -164,7 +185,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Have enough color",
                 "#00ff00",
                 "Color of checkmark if you have enough items for all quests",
-                194
+                colorsIndex--
             );
 
             UseCustomQuestColor = config.Bind(
@@ -173,7 +194,7 @@ namespace AllQuestsCheckmarks.Helpers
                 false,
                 MakeDescription(
                     "Whether or not to use custom checkmark color for active quests",
-                    193
+                    generalIndex--
                 )
             );
 
@@ -182,16 +203,19 @@ namespace AllQuestsCheckmarks.Helpers
                 "Custom quest color",
                 "#ffeb6d",
                 "Custom color of default quest checkmark",
-                192
+                colorsIndex--
             );
 
+            /*
+             * TEXT
+             */
             BulletPoints = config.Bind(
                 "3. Text",
                 "Use bullet points",
                 true,
                 MakeDescription(
                     "Whether or not to use bullet points in quests list",
-                    299
+                    textIndex--
                 )
             );
 
@@ -201,7 +225,7 @@ namespace AllQuestsCheckmarks.Helpers
                 false,
                 MakeDescription(
                     "Whether or not to use custom text colors",
-                    298
+                    textIndex--
                 )
             );
 
@@ -210,7 +234,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Custom text color - active quests",
                 "#dd831a",
                 "Custom color of active quests text",
-                297
+                textIndex--
             );
 
             FutureQuestTextColor = config.BindColor(
@@ -218,7 +242,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Custom text color - future quests",
                 "#d24dff",
                 "Custom color of future quests text",
-                296
+                textIndex--
             );
 
             if (Plugin.isFikaInstalled)
@@ -229,7 +253,7 @@ namespace AllQuestsCheckmarks.Helpers
                     true,
                     MakeDescription(
                         "Wether or not to mark items currently needed for players in your squad",
-                        94
+                        generalIndex--
                     )
                 );
 
@@ -238,7 +262,7 @@ namespace AllQuestsCheckmarks.Helpers
                     "Checkmark color (squad members)",
                     "#ff3333",
                     "Color of checkmark if item is not currently needed but is required for one of your squad members",
-                    196
+                    colorsIndex--
                 );
 
                 SquadQuestTextColor = config.BindColor(
@@ -246,19 +270,24 @@ namespace AllQuestsCheckmarks.Helpers
                     "Custom text color - squad quests",
                     "#ffc299",
                     "Custom color of squad quests text",
-                    295
+                    textIndex--
                 );
             }
 
+            /*
+             * MoreCheckmarks
+             */
             if (Plugin.isMoreCheckmarksInstalled)
             {
+                int moreCheckmarksIndex = 399;
+
                 MoreCheckmarksHideout = config.Bind(
                     "4. MoreCheckmarks",
                     "Include hideout upgrades",
                     true,
                     MakeDescription(
                         "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod",
-                        399
+                        moreCheckmarksIndex--
                     )
                 );
 
@@ -268,7 +297,7 @@ namespace AllQuestsCheckmarks.Helpers
                     true,
                     MakeDescription(
                         "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod in 'Total needed' count",
-                        398
+                        moreCheckmarksIndex--
                     )
                 );
 
@@ -277,7 +306,7 @@ namespace AllQuestsCheckmarks.Helpers
                     "Hideout upgrades color",
                     "#0000ff",
                     "Color of checkmark for items required for hideout upgrades",
-                    397
+                    moreCheckmarksIndex--
                 );
 
                 MoreCheckmarksBarters = config.Bind(
@@ -286,7 +315,7 @@ namespace AllQuestsCheckmarks.Helpers
                    true,
                    MakeDescription(
                        "Whether or not to include items required for barters from MoreCheckmarks mod",
-                       396
+                       moreCheckmarksIndex--
                    )
                 );
 
@@ -296,7 +325,7 @@ namespace AllQuestsCheckmarks.Helpers
                    true,
                    MakeDescription(
                        "Whether or not to show checkmark for barter items from MoreCheckmarks mod",
-                       395
+                       moreCheckmarksIndex--
                    )
                 );
 
@@ -305,10 +334,13 @@ namespace AllQuestsCheckmarks.Helpers
                     "Barter color",
                     "#00ffff",
                     "Color of checkmark for items required for barters",
-                    394
+                    moreCheckmarksIndex--
                 );
             }
 
+            /*
+             * DEBUG
+             */
             ShowDebug = config.Bind(
                 "9. Debug",
                 "Debug logs",
@@ -316,7 +348,7 @@ namespace AllQuestsCheckmarks.Helpers
                 "Log debug info to Player.log"
             );
 
-            foreach(ColorEntry color in _allColors)
+            foreach (ColorEntry color in _allColors)
             {
                 color.Parse();
             }

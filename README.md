@@ -28,6 +28,7 @@ You can access config while in-game by pressing `F12` key and then selecting `Al
 * **Include loyalty regain quests** - Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)
 * **Include non-FiR quest** - Whether or not to include quests that don't require found in raid items
 * **Hide checkmark if have enough (in raid)** - Whether or not to hide checkmark in raid on items that you have enough for all active and future quests. Be careful when using with 'Include items in PMC inventory (in raid)', as this combo may hide checkmarks while still in raid!
+* **Hide checkmark if have enough (in raid)** - Whether or not to show only active quests (no future quests)
 * **Include items in PMC inventory (in raid)** - Whether or not to include items in PMC inventory while in raid in 'In Stash' count
 * **Mark squad members quests** - Whether or not to mark items currently needed for players in your squad (**FIKA only**)
 

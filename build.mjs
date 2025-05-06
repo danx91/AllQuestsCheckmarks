@@ -1,7 +1,7 @@
 import fs from "fs";
 import archiver from "archiver"
 import path from "path"
-import config from "./build.json" assert { type: "json" }
+import config from "./build.json" with { "type": "json" }
 import {globSync} from "glob"
 
 console.log(`Building version=${config.info.version}, spt=${config.info.spt}`)

@@ -12,7 +12,7 @@ namespace AllQuestsCheckmarks
 {
     [
         BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.4"),
-        BepInDependency("com.SPT.core", "3.11.0"),
+        BepInDependency("com.SPT.core", "4.0.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
         BepInDependency("VIP.TommySoucy.MoreCheckmarks", BepInDependency.DependencyFlags.SoftDependency)
     ]
@@ -37,18 +37,12 @@ namespace AllQuestsCheckmarks
             Assets.LoadAssets();
 
             if (isFikaInstalled)
-            {
                 FikaBridge.Init();
-            }
             else
-            {
                 new LocalGameStartPatch().Enable();
-            }
 
             if (isMoreCheckmarksInstalled)
-            {
                 MoreCheckmarksBridge.Init();
-            }
 
             new QuestClassPatch().Enable();
             new ProfileSelectionPatch().Enable();
@@ -62,9 +56,7 @@ namespace AllQuestsCheckmarks
         public static void LogDebug(string msg)
         {
             if (!Settings.ShowDebug.Value)
-            {
                 return;
-            }
 
             LogSource.LogDebug(msg);
         }

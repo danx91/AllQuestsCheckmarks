@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-
-using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Players;
+using Fika.Core.Main.Components;
+using Fika.Core.Main.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-
 using AllQuestsCheckmarks.Helpers;
 
 namespace AllQuestsCheckmarks.Fika.Helpers
@@ -25,18 +23,14 @@ namespace AllQuestsCheckmarks.Fika.Helpers
 
                 Dictionary<string, string> players = new Dictionary<string, string>();
 
-                foreach(CoopPlayer player in coopHandler.HumanPlayers)
+                foreach(FikaPlayer player in coopHandler.HumanPlayers)
                 {
                     if(player != coopHandler.MyPlayer)
-                    {
                         players.Add(player.ProfileId, player.Profile.Nickname);
-                    }
                 }
 
                 if(players.Count == 0)
-                {
                     return;
-                }
 
                 FikaBridge.InvokeCoopPlayersEvent(players);
             });

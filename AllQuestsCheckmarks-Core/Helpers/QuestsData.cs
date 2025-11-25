@@ -9,8 +9,8 @@ namespace AllQuestsCheckmarks.Helpers
     {
         public class QuestItems
         {
-            public int count = 0;
-            public bool fir = false;
+            public int count;
+            public bool fir;
 
             public QuestItems(int count, bool fir)
             {
@@ -27,22 +27,17 @@ namespace AllQuestsCheckmarks.Helpers
 
             public QuestValues(int count, bool isFir, string name, string localizedName)
             {
-                this.Count = new QuestItems(count, isFir);
-                this.Name = name;
-                this.LocalizedName = localizedName;
+                Count = new QuestItems(count, isFir);
+                Name = name;
+                LocalizedName = localizedName;
             }
         }
 
         public class ItemData
         {
-            public int Fir = 0;
-            public int NonFir = 0;
-            public int Total {
-                get
-                {
-                    return Fir + NonFir;
-                }
-            }
+            public int Fir;
+            public int NonFir;
+            public int Total => Fir + NonFir;
             public Dictionary<string, QuestValues> Quests = new Dictionary<string, QuestValues>();
         }
 
@@ -53,7 +48,7 @@ namespace AllQuestsCheckmarks.Helpers
 
             public QuestRequirements(string questId)
             {
-                this.QuestId = questId;
+                QuestId = questId;
             }
         }
 
@@ -79,11 +74,33 @@ namespace AllQuestsCheckmarks.Helpers
             List<string> allQuestIds = new List<string>();
             List<string> unreachableRootQuestIds = new List<string>();
 
+            if (_questsData == null)
+            {
+                Plugin.LogSource.LogError("_questData is null!");
+                return;
+            }
+
             for (int i = 0; i < _questsData.Count; ++i)
             {
                 JObject quest = _questsData[i] as JObject;
-                string questId = quest["_id"].ToString();
-                if (quest["conditions"] == null || quest["conditions"]["AvailableForStart"] == null)
+
+                if (quest == null)
+                {
+                    Plugin.LogSource.LogError("Quest is null!");
+                    continue;
+                }
+                
+                JObject baseObj = quest["Base"] as JObject;
+
+                if (baseObj?["_id"] == null)
+                {
+                    Plugin.LogSource.LogError("Quest[_id] is null!");
+                    continue;
+                }
+                
+                string questId = baseObj["_id"].ToString();
+                
+                if (baseObj["conditions"] ? ["AvailableForStart"] == null)
                 {
                     Plugin.LogSource.LogError($"Quest {questId} is missing finish conditions!");
                     continue;
@@ -91,10 +108,8 @@ namespace AllQuestsCheckmarks.Helpers
 
                 allQuestIds.Add(questId);
 
-                if (quest["isUnreachable"]?.ToString() == "True")
-                {
+                if (baseObj["isUnreachable"]?.ToString() == "True")
                     unreachableRootQuestIds.Add(questId);
-                }
 
                 if (!dependencyList.TryGetValue(questId, out QuestRequirements questRequirements))
                 {
@@ -102,10 +117,24 @@ namespace AllQuestsCheckmarks.Helpers
                     dependencyList.Add(questId, questRequirements);
                 }
 
-                JArray startConditions = quest["conditions"]["AvailableForStart"] as JArray;
+                JArray startConditions = baseObj["conditions"]["AvailableForStart"] as JArray;
+                
+                if (startConditions == null)
+                {
+                    Plugin.LogSource.LogError("Start Condition is null!");
+                    continue;
+                }
+                
                 for (int j = 0; j < startConditions.Count; ++j)
                 {
                     JObject condition = startConditions[j] as JObject;
+                    
+                    if (condition == null)
+                    {
+                        Plugin.LogSource.LogError("Condition is null!");
+                        continue;
+                    }
+                    
                     string conditionType = condition["conditionType"]?.ToString();
 
                     if (conditionType == null)
@@ -113,8 +142,13 @@ namespace AllQuestsCheckmarks.Helpers
                         Plugin.LogSource.LogError($"Quest {questId} is missing start condition #{j}!");
                         continue;
                     }
-                    else if (conditionType != "Quest")
+
+                    if (conditionType != "Quest")
+                        continue;
+                    
+                    if (condition["target"] == null)
                     {
+                        Plugin.LogSource.LogError("condition[\"target\"] is null!");
                         continue;
                     }
 
@@ -134,20 +168,18 @@ namespace AllQuestsCheckmarks.Helpers
 
             foreach (string questId in allQuestIds)
             {
-                if(IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds, cache))
-                {
-                    Plugin.LogDebug($"Quest {questId} is unreachable");
-                    _unreachableQuests.Add(questId);
-                }
+                if (!IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds, cache)) 
+                    continue;
+                
+                Plugin.LogDebug($"Quest {questId} is unreachable");
+                _unreachableQuests.Add(questId);
             }
         }
 
         private static bool IsQuestUnreachable(QuestRequirements requirements, List<string> unreachableRoot, Dictionary<string, bool> cache, Stack<string> stack = null)
         {
             if(stack == null)
-            {
                 stack = new Stack<string>();
-            }
 
             //Check for circular dependency - assume reachable
             if (stack.Contains(requirements.QuestId))
@@ -156,19 +188,22 @@ namespace AllQuestsCheckmarks.Helpers
                 return false;
             }
             //Root is unreachable - unreachable
-            else if (unreachableRoot.Contains(requirements.QuestId))
+
+            if (unreachableRoot.Contains(requirements.QuestId))
             {
                 Plugin.LogDebug($"Quest {requirements.QuestId} has unreachable root quest!");
                 return true;
             }
             //Empty requirements - reachable
-            else if (requirements.List.Count == 0)
+
+            if (requirements.List.Count == 0)
             {
                 Plugin.LogDebug($"Quest {requirements.QuestId} has no requirements!");
                 return false;
             }
             //Already checked - return cached value
-            else if (cache.TryGetValue(requirements.QuestId, out bool cached))
+
+            if (cache.TryGetValue(requirements.QuestId, out bool cached))
             {
                 Plugin.LogDebug($"Quest {requirements.QuestId} already checked - returning cached value ({cached})");
                 return cached;
@@ -180,11 +215,11 @@ namespace AllQuestsCheckmarks.Helpers
             //Traverse quest requirements list
             foreach (QuestRequirements req in requirements.List)
             {
-                if(IsQuestUnreachable(req, unreachableRoot, cache, stack))
-                {
-                    cache.Add(requirements.QuestId, true);
-                    return true;
-                }
+                if (!IsQuestUnreachable(req, unreachableRoot, cache, stack)) 
+                    continue;
+                
+                cache.Add(requirements.QuestId, true);
+                return true;
             }
 
             //Pop current quest from stack
@@ -204,28 +239,35 @@ namespace AllQuestsCheckmarks.Helpers
             for (int i = 0; i < _questsData.Count; ++i)
             {
                 JObject quest = _questsData[i] as JObject;
-                string questId = quest["_id"].ToString();
+                JObject baseObj = quest["Base"] as JObject;
+                string questId = baseObj["_id"].ToString();
 
                 if (_unreachableQuests.Contains(questId))
                 {
                     continue;
                 }
-                else if (quest["conditions"] == null || quest["conditions"]["AvailableForFinish"] == null)
+
+                if (baseObj["conditions"] ? ["AvailableForFinish"] == null)
                 {
                     Plugin.LogSource.LogError($"Quest {questId} is missing finish conditions!");
                     continue;
                 }
-                else if (questId == QuestsHelper.COLLECTOR_ID && !Settings.IncludeCollector.Value)
+
+                if (questId == QuestsHelper.COLLECTOR_ID && 
+                    !Settings.IncludeCollector.Value)
                 {
                     Plugin.LogDebug("Collector skipped");
                     continue;
                 }
-                else if (!Settings.IncludeLoyaltyRegain.Value && QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
+
+                if (!Settings.IncludeLoyaltyRegain.Value && 
+                    QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
                 {
                     continue;    
                 }
 
-                JArray finishConditions = quest["conditions"]["AvailableForFinish"] as JArray;
+                JArray finishConditions = baseObj["conditions"]["AvailableForFinish"] as JArray;
+                
                 for(int j = 0; j < finishConditions.Count; ++j)
                 {
                     JObject condition = finishConditions[j] as JObject;
@@ -238,16 +280,22 @@ namespace AllQuestsCheckmarks.Helpers
                         Plugin.LogSource.LogError($"Quest {questId} is missing finish condition #{j}!");
                         continue;
                     }
-                    else if (conditionType != "HandoverItem" && conditionType != "FindItem" && !isLeaveAtLocation)
+
+                    if (conditionType != "HandoverItem" && 
+                        conditionType != "FindItem" && 
+                        !isLeaveAtLocation)
                     {
                         continue;
                     }
-                    else if (condition["target"] == null)
+
+                    if (condition["target"] == null)
                     {
                         Plugin.LogSource.LogError($"Quest {questId} condition #{j} is missing target!");
                         continue;
                     }
-                    else if (!fir && !Settings.IncludeNonFir.Value)
+
+                    if (!fir && 
+                        !Settings.IncludeNonFir.Value)
                     {
                         Plugin.LogDebug($"Quest {questId} condition #{j} skipped (Non-FIR disabled)");
                         continue;
@@ -266,13 +314,15 @@ namespace AllQuestsCheckmarks.Helpers
                         {
                             continue;
                         }
-                        else if(isLeaveAtLocation && HasItemInFindOrHandover(itemId, finishConditions))
+
+                        if(isLeaveAtLocation && 
+                           HasItemInFindOrHandover(itemId, finishConditions))
                         {
                             Plugin.LogDebug($"Quest have both handover/find and leave (questId={questId}, itemId={itemId}, fir={fir})");
                             continue;
                         }
 
-                        AddItem(itemId, count, fir, isLeaveAtLocation, questId, quest["QuestName"]?.ToString(), quest["name"].ToString());
+                        AddItem(itemId, count, fir, isLeaveAtLocation, questId, baseObj["QuestName"]?.ToString(), baseObj["name"].ToString());
                     }
                 }
             }
@@ -307,12 +357,14 @@ namespace AllQuestsCheckmarks.Helpers
                 QuestItemsByQuestId.Add(questId, questItems);
             }
 
-            if(questItems.TryGetValue(itemId, out QuestItems q) && !skipCheck)
+            if(questItems.TryGetValue(itemId, out QuestItems q) && 
+               !skipCheck)
             {
                 Plugin.LogDebug($"Quest {questId} already has item {itemId} - skip");
                 return;
             }
-            else if(q != null)
+
+            if(q != null)
             {
                 Plugin.LogDebug($"Add duplicate [1] (questId={questId}, itemId={itemId}, savedFir={q.fir}, fir={fir})");
                 q.count += count;
@@ -346,13 +398,9 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             if (fir)
-            {
                 items.Fir += count;
-            }
             else
-            {
                 items.NonFir += count;
-            }
         }
 
         public static void RemoveQuest(string questId)
@@ -378,23 +426,17 @@ namespace AllQuestsCheckmarks.Helpers
                 itemData.Quests.Remove(questId);
 
                 if (items.fir)
-                {
                     itemData.Fir -= items.count;
-                }
                 else
-                {
                     itemData.NonFir -= items.count;
-                }
 
-                if(itemData.Quests.Count == 0)
-                {
-                    if(itemData.Total != 0)
-                    {
-                        Plugin.LogSource.LogWarning($"Quest {questId} list for item {itemId} is empty, but item count is non-zero ({itemData.Total})!");
-                    }
+                if (itemData.Quests.Count != 0) 
+                    continue;
+                
+                if(itemData.Total != 0)
+                    Plugin.LogSource.LogWarning($"Quest {questId} list for item {itemId} is empty, but item count is non-zero ({itemData.Total})!");
 
-                    QuestItemsByItemId.Remove(item.Key);
-                }
+                QuestItemsByItemId.Remove(item.Key);
             }
 
             QuestItemsByQuestId.Remove(questId);

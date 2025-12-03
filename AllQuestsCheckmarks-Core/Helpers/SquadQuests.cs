@@ -36,13 +36,14 @@ namespace AllQuestsCheckmarks.Helpers
                     JObject quest = questsData[i] as JObject;
                     string questId = quest["_id"].ToString();
 
-                    if (quest["conditions"] == null || quest["conditions"]["AvailableForFinish"] == null)
+                    if (quest["conditions"] ? ["AvailableForFinish"] == null)
                     {
                         Plugin.LogSource.LogError($"Quest {questId} is missing finish conditions!");
                         continue;
                     }
 
                     JArray finishConditions = quest["conditions"]["AvailableForFinish"] as JArray;
+                    
                     for (int j = 0; j < finishConditions.Count; ++j)
                     {
                         JObject condition = finishConditions[j] as JObject;
@@ -54,29 +55,31 @@ namespace AllQuestsCheckmarks.Helpers
                             Plugin.LogSource.LogError($"Quest {questId} is missing finish condition #{j}!");
                             continue;
                         }
-                        else if (conditionType != "HandoverItem" && conditionType != "FindItem" && conditionType != "LeaveItemAtLocation")
-                        {
+
+                        if (conditionType != "HandoverItem" && 
+                            conditionType != "FindItem" && 
+                            conditionType != "LeaveItemAtLocation")
                             continue;
-                        }
-                        else if (condition["target"] == null)
+
+                        if (condition["target"] == null)
                         {
                             Plugin.LogSource.LogError($"Quest {questId} condition #{j} is missing target!");
                             continue;
                         }
 
                         JArray targets = condition["target"] as JArray;
+                        
                         for (int k = 0; k < targets.Count; ++k)
                         {
                             string itemId = targets[k].ToString();
-                            if (conditionType != "HandoverItem" && QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
-                            {
+                            
+                            if (conditionType != "HandoverItem" && 
+                                QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
                                 continue;
-                            }
 
-                            if (!playerQuests.TryGetValue(itemId, out bool wasFir) || (!wasFir && fir))
-                            {
+                            if (!playerQuests.TryGetValue(itemId, out bool wasFir) || 
+                                (!wasFir && fir))
                                 playerQuests[itemId] = fir;
-                            }
                         }
                     }
                 }
@@ -97,10 +100,10 @@ namespace AllQuestsCheckmarks.Helpers
             {
                 keyValuePair.Deconstruct(out string profileId, out Dictionary<string, bool> items);
 
-                if (items.TryGetValue(item.TemplateId, out bool fir) && (!fir || item.MarkedAsSpawnedInSession) && _squadNicks.TryGetValue(profileId, out string nick))
-                {
+                if (items.TryGetValue(item.TemplateId, out bool fir) && 
+                    (!fir || item.MarkedAsSpawnedInSession) && 
+                    _squadNicks.TryGetValue(profileId, out string nick))
                     members.Add(nick);
-                }
             }
 
             return members.Count > 0;

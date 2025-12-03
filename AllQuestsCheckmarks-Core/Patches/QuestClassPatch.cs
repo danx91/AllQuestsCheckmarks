@@ -35,7 +35,7 @@ namespace AllQuestsCheckmarks.Patches
             switch (__instance.QuestStatus)
             {
                 case EQuestStatus.Started:
-                    if(__instance is GClass3691)
+                    if (__instance is GClass3996)
                     {
                        Plugin.LogDebug($"Repeatable quest {__instance.Template.Name} accepetd - reload quests");
                        QuestsData.LoadData();

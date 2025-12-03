@@ -56,8 +56,8 @@ namespace AllQuestsCheckmarks.Helpers
 
             public CurrentQuest(RawQuestClass template, ConditionItem condition)
             {
-                this.Template = template;
-                this.Condition = condition;
+                Template = template;
+                Condition = condition;
             }
         }
 
@@ -69,12 +69,9 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static bool IsNeededForActiveOrFutureQuests(Item item, out QuestsData.ItemData quests)
         {
-            if(QuestsData.QuestItemsByItemId.TryGetValue(item.TemplateId, out quests) && (item.MarkedAsSpawnedInSession && quests.Total > 0 || quests.NonFir > 0))
-            {
-                return true;
-            }
-
-            return false;
+            return QuestsData.QuestItemsByItemId.TryGetValue(item.TemplateId, out quests) && 
+                   (item.MarkedAsSpawnedInSession && quests.Total > 0 || 
+                    quests.NonFir > 0);
         }
 
         public static bool GetActiveQuestsWithItem(Profile profile, Item item, out Dictionary<string, CurrentQuest> activeQuests,
@@ -86,77 +83,67 @@ namespace AllQuestsCheckmarks.Helpers
 
             foreach(QuestDataClass questDataClass in profile.QuestsData)
             {
-                if(questDataClass.Template == null || (questDataClass.Status != EQuestStatus.Started && questDataClass.Status != EQuestStatus.AvailableForFinish))
-                {
+                if(questDataClass.Template == null || 
+                   (questDataClass.Status != EQuestStatus.Started && 
+                    questDataClass.Status != EQuestStatus.AvailableForFinish))
                     continue;
-                }
 
-                foreach(KeyValuePair<EQuestStatus, GClass3878> keyValuePair in questDataClass.Template.Conditions)
+                foreach(KeyValuePair<EQuestStatus, GClass1631> keyValuePair in questDataClass.Template.Conditions)
                 {
-                    keyValuePair.Deconstruct(out EQuestStatus questStatus, out GClass3878 conditions);
+                    keyValuePair.Deconstruct(out _, out GClass1631 conditions);
 
                     ConditionItem tmpCondition = null;
                     bool isFulfilled = false;
 
                     foreach(Condition condition in conditions)
                     {
-                        if (condition is ConditionItem conditionItem && conditionItem.target.Contains(item.StringTemplateId))
-                        {
-                            isFulfilled = questDataClass.CompletedConditions.Contains(condition.id);
-                            tmpCondition = conditionItem;
+                        if (!(condition is ConditionItem conditionItem) ||
+                            !conditionItem.target.Contains(item.StringTemplateId)) 
+                            continue;
+                        
+                        isFulfilled = questDataClass.CompletedConditions.Contains(condition.id);
+                        tmpCondition = conditionItem;
 
-                            if(conditionItem is ConditionHandoverItem)
-                            {
-                                break;
-                            }
-                        }
+                        if(conditionItem is ConditionHandoverItem)
+                            break;
                     }
 
-                    if(tmpCondition != null)
+                    if (tmpCondition == null) 
+                        continue;
+                    
+                    if (isFulfilled)
                     {
-                        if (isFulfilled)
-                        {
-                            fulfilled.Add(questDataClass.Template.Id, new CurrentQuest(questDataClass.Template, tmpCondition));
-                        }
-                        else
-                        {
-                            activeQuests.Add(questDataClass.Template.Id, new CurrentQuest(questDataClass.Template, tmpCondition));
-
-                            if (!tmpCondition.onlyFoundInRaid)
-                            {
-                                activeNonFir = true;
-                            }
-                        }
-                        break;
+                        fulfilled.Add(questDataClass.Template.Id, new CurrentQuest(questDataClass.Template, tmpCondition));
                     }
+                    else
+                    {
+                        activeQuests.Add(questDataClass.Template.Id, new CurrentQuest(questDataClass.Template, tmpCondition));
+
+                        if (!tmpCondition.onlyFoundInRaid)
+                            activeNonFir = true;
+                    }
+                    break;
                 }
             }
 
             if(activeQuests.Count == 0)
-            {
                 return false;
-            }
-            else if (item.QuestItem)
-            {
-                return true;
-            }
 
-            if (item is Weapon weapon)
+            if (item.QuestItem)
+                return true;
+
+            if (!(item is Weapon weapon)) 
+                return activeNonFir || item.MarkedAsSpawnedInSession;
+            
+            foreach (KeyValuePair<string, CurrentQuest> quest in new Dictionary<string, CurrentQuest>(activeQuests))
             {
-                foreach (KeyValuePair<string, CurrentQuest> quest in new Dictionary<string, CurrentQuest>(activeQuests))
-                {
-                    if (quest.Value.Condition is ConditionWeaponAssembly conditionWeaponAssembly)
-                    {
-                        if (Inventory.IsWeaponFitsCondition(weapon, conditionWeaponAssembly, false))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            activeQuests.Remove(quest.Key);
-                        }
-                    }
-                }
+                if (!(quest.Value.Condition is ConditionWeaponAssembly conditionWeaponAssembly)) 
+                    continue;
+                
+                if (Inventory.IsWeaponFitsCondition(weapon, conditionWeaponAssembly))
+                    return true;
+                
+                activeQuests.Remove(quest.Key);
             }
 
             return activeNonFir || item.MarkedAsSpawnedInSession;
@@ -164,36 +151,26 @@ namespace AllQuestsCheckmarks.Helpers
         
         public static ECheckmarkStatus GetCheckmarkStatus(bool active, bool future, bool squad, bool fir, bool enough, bool collector)
         {
-            if (enough && (active || future))
+            if (enough && 
+                (active || future))
             {
                 if(Settings.HideFulfilled.Value && IsInRaid())
-                {
-                    return squad ? ECheckmarkStatus.Squad : (fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None);
-                }
-                else if(Settings.MarkEnoughItems.Value)
-                {
+                    return squad ? ECheckmarkStatus.Squad : fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None;
+
+                if(Settings.MarkEnoughItems.Value)
                     return squad ? ECheckmarkStatus.Squad : ECheckmarkStatus.Fulfilled;
-                }
             }
 
             if (active)
-            {
                 return ECheckmarkStatus.Active;
-            }
-            else if (future)
-            {
-                return collector ? ECheckmarkStatus.Collector : ECheckmarkStatus.Future;
-            }
-            else if (squad)
-            {
-                return ECheckmarkStatus.Squad;
-            }
-            else if (fir)
-            {
-                return ECheckmarkStatus.Fir;
-            }
 
-            return ECheckmarkStatus.None;
+            if (future)
+                return collector ? ECheckmarkStatus.Collector : ECheckmarkStatus.Future;
+
+            if (squad)
+                return ECheckmarkStatus.Squad;
+
+            return fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None;
         }
 
         public static void SetCheckmark(QuestItemViewPanel panel, Image image, Sprite sprite, Color color)

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -11,7 +10,7 @@ namespace AllQuestsCheckmarks.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Class303.Class1470), nameof(Class303.Class1470.method_0));
+            return AccessTools.Method(typeof(Class308.Class1596), nameof(Class308.Class1596.method_0));
         }
 
         [PatchPostfix]

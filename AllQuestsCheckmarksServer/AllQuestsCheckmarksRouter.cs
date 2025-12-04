@@ -56,7 +56,12 @@ namespace AllQuestsCheckmarks
                         Dictionary<MongoId, List<QuestStripped>> data = [];
 
                         foreach (MongoId profileId in info) {
-                            data[profileId] = GetActiveQuests(profileId);
+                            try {
+                                data[profileId] = GetActiveQuests(profileId);
+                            } catch (Exception ex) {
+                                _logger?.Error($"Error retrieving active quests for profile {profileId}: {ex}");
+                                data[profileId] = [];
+                            }
                         }
 
                         return new ValueTask<string>(_jsonUtil!.Serialize(data)!);

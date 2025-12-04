@@ -17,11 +17,6 @@ namespace AllQuestsCheckmarks
     internal class AllQuestsCheckmarksRouter : StaticRouter
     {
         private class ActiveQuestsRequestData : List<MongoId>, IRequestData;
-        private class Quest2(Quest quest)
-        {
-            public Quest Quest { get; set; } = quest;
-            public bool? IsUnreachable { get; set; }
-        }
 
         private static JsonUtil? _jsonUtil;
         private static HttpResponseUtil? _httpResponseUtil;
@@ -58,7 +53,7 @@ namespace AllQuestsCheckmarks
                 new RouteAction<ActiveQuestsRequestData>(
                     "/all-quests-checkmarks/active-quests",
                     (url, info, sessionId, output) => {
-                        Dictionary<MongoId, List<Quest>> data = [];
+                        Dictionary<MongoId, List<QuestStripped>> data = [];
 
                         foreach (MongoId profileId in info) {
                             data[profileId] = GetActiveQuests(profileId);
@@ -82,24 +77,28 @@ namespace AllQuestsCheckmarks
 
             QuestConfig questConfig = _configServer!.GetConfig<QuestConfig>();
 
-            List<Quest2> quests = [];
-            List<Quest2> allQuests = [.. _questHelper!.GetQuestsFromDb().Select(q => new Quest2(q))];
+            List<QuestJson> quests = [];
+            List<Quest> allQuests = _questHelper!.GetQuestsFromDb();
 
-            foreach (Quest2 quest in allQuests)
+            foreach (Quest quest in allQuests)
             {
-                if (!_questHelper.ShowEventQuestToPlayer(quest.Quest.Id) || !IsQuestForGameType(quest.Quest.Id, profileInfo.GameVersion!, questConfig))
+                if (!_questHelper.ShowEventQuestToPlayer(quest.Id) || !IsQuestForGameType(quest.Id, profileInfo.GameVersion!, questConfig))
                 {
-                    quest.IsUnreachable = true;
-                    quests.Add(quest);
+                    QuestJson newQuest = new(quest)
+                    {
+                        IsUnreachable = true
+                    };
+
+                    quests.Add(newQuest);
                     continue;
                 }
 
-                if (IsOtherFaction(profile, quest.Quest.Id, questConfig))
+                if (IsOtherFaction(profile, quest.Id, questConfig))
                 {
                     continue;
                 }
 
-                QuestStatusEnum questStatus = profile.GetQuestStatus(quest.Quest.Id);
+                QuestStatusEnum questStatus = profile.GetQuestStatus(quest.Id);
                 if (questStatus is
                     QuestStatusEnum.AvailableForFinish or
                     QuestStatusEnum.Success or
@@ -111,23 +110,23 @@ namespace AllQuestsCheckmarks
                     continue;
                 }
 
-                quests.Add(quest);
+                quests.Add(new QuestJson(quest));
             }
 
             foreach (RepeatableQuest quest in GetRepeatableQuests(profile))
             {
                 if(profile.GetQuestStatus(quest.Id) == QuestStatusEnum.Started)
                 {
-                    quests.Add(new Quest2(quest));
+                    quests.Add(new QuestJson(quest));
                 }
             }
 
             return new ValueTask<string>(_jsonUtil!.Serialize(quests)!);
         }
 
-        private static List<Quest> GetActiveQuests(MongoId profileId)
+        private static List<QuestStripped> GetActiveQuests(MongoId profileId)
         {
-            List<Quest> quests = [];
+            List<QuestStripped> quests = [];
             PmcData? profile = _profileHelper!.GetPmcProfile(profileId);
 
             if(profile == null || profile.Quests is not List<QuestStatus> profileQuests)
@@ -148,7 +147,7 @@ namespace AllQuestsCheckmarks
 
                 if (questStatus.CompletedConditions == null || questStatus.CompletedConditions.Count == 0)
                 {
-                    quests.Add(quest);
+                    quests.Add(new QuestStripped(quest));
                     continue;
                 }
 
@@ -159,16 +158,14 @@ namespace AllQuestsCheckmarks
                     continue;
                 }
 
-                Quest newQuest = Clone(quest);
-                newQuest.Conditions.AvailableForFinish = newConditions;
-                quests.Add(newQuest);
+                quests.Add(new(quest, availableForFinishCondition: AvailableForFinishCondition.FromQuestConditions(newConditions)));
             }
 
             foreach (RepeatableQuest quest in GetRepeatableQuests(profile))
             {
                 if (profile.GetQuestStatus(quest.Id) == QuestStatusEnum.Started)
                 {
-                    quests.Add(quest);
+                    quests.Add(new QuestStripped(quest));
                 }
             }
 
@@ -202,7 +199,7 @@ namespace AllQuestsCheckmarks
 
         private static bool IsOtherFaction(PmcData profile, MongoId questId, QuestConfig questConfig)
         {
-            bool usec = profile.Info!.Side!.ToLower() == "usec";
+            bool usec = profile.Info!.Side!.Equals("usec", StringComparison.CurrentCultureIgnoreCase);
             return usec && questConfig.BearOnlyQuests.Contains(questId) ||
                    !usec && questConfig.UsecOnlyQuests.Contains(questId);
         }
@@ -220,11 +217,6 @@ namespace AllQuestsCheckmarks
             }
 
             return true;
-        }
-
-        private static T Clone<T>(T source)
-        {
-            return _jsonUtil!.Deserialize<T>(_jsonUtil!.Serialize(source)!)!;
         }
     }
 }

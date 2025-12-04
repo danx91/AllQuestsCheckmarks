@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Comfort.Common;
-
+﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using EFT.UI.DragAndDrop;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,16 +12,16 @@ namespace AllQuestsCheckmarks.Helpers
 {
     internal static class QuestsHelper
     {
-        public static readonly Color DEFAULT_COLOR = new Color(1, 1, 1, 0.706f);
+        public static readonly Color DEFAULT_COLOR = new(1, 1, 1, 0.706f);
         public static readonly string COLLECTOR_ID = "5c51aac186f77432ea65c552";
-        public static readonly List<string> SPECIAL_BLACKLIST = new List<string>()
-        {
+        public static readonly List<MongoID> SPECIAL_BLACKLIST =
+        [
             "5991b51486f77447b112d44f", //MS2000 Marker
             "5ac78a9b86f7741cca0bbd8d", //Signal Jammer
             "5b4391a586f7745321235ab2" //Wi-Fi Camera
-        };
-        public static readonly List<string> TRUST_REGAIN_QUESTS = new List<string>
-        {
+        ];
+        public static readonly List<MongoID> TRUST_REGAIN_QUESTS =
+        [
             //Lightkeeper
             "626148251ed3bb5bcc5bd9ed", //Make Amends - Buyout
             "6261482fa4eb80027c4f2e11", //Make Amends - Equipment
@@ -36,7 +35,7 @@ namespace AllQuestsCheckmarks.Helpers
             "59ca1a6286f774509a270942", // No Offence (Prapor)
             "59c93e8e86f7742a406989c4", // Loyalty Buyout (Skier)
             "59c9392986f7742f6923add2", // Trust Regain (Therapist)
-        };
+        ];
 
         public enum ECheckmarkStatus
         {
@@ -49,16 +48,10 @@ namespace AllQuestsCheckmarks.Helpers
             Collector = 6
         }
 
-        public class CurrentQuest
+        public class CurrentQuest(RawQuestClass template, ConditionItem condition)
         {
-            public RawQuestClass Template;
-            public ConditionItem Condition;
-
-            public CurrentQuest(RawQuestClass template, ConditionItem condition)
-            {
-                Template = template;
-                Condition = condition;
-            }
+            public RawQuestClass Template = template;
+            public ConditionItem Condition = condition;
         }
 
         public static bool IsInRaid()
@@ -73,12 +66,12 @@ namespace AllQuestsCheckmarks.Helpers
                    (item.MarkedAsSpawnedInSession && quests.Total > 0 || quests.NonFir > 0);
         }
 
-        public static bool GetActiveQuestsWithItem(Profile profile, Item item, out Dictionary<string, CurrentQuest> activeQuests,
-            out Dictionary<string, CurrentQuest> fulfilled)
+        public static bool GetActiveQuestsWithItem(Profile profile, Item item, out Dictionary<MongoID, CurrentQuest> activeQuests,
+            out Dictionary<MongoID, CurrentQuest> fulfilled)
         {
             bool activeNonFir = false;
-            activeQuests = new Dictionary<string, CurrentQuest>();
-            fulfilled = new Dictionary<string, CurrentQuest>();
+            activeQuests = [];
+            fulfilled = [];
 
             foreach(QuestDataClass questDataClass in profile.QuestsData)
             {
@@ -97,7 +90,7 @@ namespace AllQuestsCheckmarks.Helpers
 
                     foreach(Condition condition in conditions)
                     {
-                        if (!(condition is ConditionItem conditionItem) || !conditionItem.target.Contains(item.StringTemplateId))
+                        if (condition is not ConditionItem conditionItem || !conditionItem.target.Contains(item.StringTemplateId))
                         {
                             continue;
                         }
@@ -144,14 +137,14 @@ namespace AllQuestsCheckmarks.Helpers
                 return true;
             }
 
-            if (!(item is Weapon weapon))
+            if (item is not Weapon weapon)
             {
                 return activeNonFir || item.MarkedAsSpawnedInSession;
             }
             
-            foreach (KeyValuePair<string, CurrentQuest> quest in new Dictionary<string, CurrentQuest>(activeQuests))
+            foreach (KeyValuePair<MongoID, CurrentQuest> quest in new Dictionary<MongoID, CurrentQuest>(activeQuests))
             {
-                if (!(quest.Value.Condition is ConditionWeaponAssembly conditionWeaponAssembly))
+                if (quest.Value.Condition is not ConditionWeaponAssembly conditionWeaponAssembly)
                 {
                     continue;
                 }

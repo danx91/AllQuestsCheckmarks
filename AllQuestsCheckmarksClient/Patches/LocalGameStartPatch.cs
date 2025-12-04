@@ -1,10 +1,8 @@
-﻿using System.Reflection;
-
+﻿using AllQuestsCheckmarks.Helpers;
 using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-
-using AllQuestsCheckmarks.Helpers;
+using System.Reflection;
 
 namespace AllQuestsCheckmarks.Patches
 {

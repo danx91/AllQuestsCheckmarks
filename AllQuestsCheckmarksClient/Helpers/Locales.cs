@@ -1,12 +1,12 @@
-﻿using System.IO;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     internal static class Locales
     {
-        private static readonly List<string> _loadedLocales = new List<string>();
+        private static readonly List<string> _loadedLocales = [];
         private static Dictionary<string, string>? _english;
 
         public static void LoadLocale(string localeId)
@@ -57,7 +57,7 @@ namespace AllQuestsCheckmarks.Helpers
         private static Dictionary<string, string> ReadLocale(string path)
         {
             JObject localeJSON = JObject.Parse(File.ReadAllText(path));
-            Dictionary<string, string> localeDict = new Dictionary<string, string>();
+            Dictionary<string, string> localeDict = [];
 
             foreach (KeyValuePair<string, JToken?> item in localeJSON)
             {

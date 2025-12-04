@@ -1,17 +1,15 @@
-﻿using System.IO;
-using System.Reflection;
-
-using BepInEx;
-using BepInEx.Logging;
-using BepInEx.Bootstrap;
-
-using AllQuestsCheckmarks.Helpers;
+﻿using AllQuestsCheckmarks.Helpers;
 using AllQuestsCheckmarks.Patches;
+using BepInEx;
+using BepInEx.Bootstrap;
+using BepInEx.Logging;
+using System.IO;
+using System.Reflection;
 
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("com.zgfuedkx.allquestscheckmarks", "AllQuestsCheckmarks", "1.3.0"),
+        BepInPlugin("com.zgfuedkx.allquestscheckmarks", "AllQuestsCheckmarks", "1.3.1"),
         BepInDependency("com.SPT.core", "4.0.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
     ]

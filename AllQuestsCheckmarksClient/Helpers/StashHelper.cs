@@ -1,23 +1,22 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-
+﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using SPT.Reflection.Utils;
-using Comfort.Common;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     class StashHelper
     {
-        public static readonly List<string> MoneyIds = new List<string>
-        {
+        public static readonly List<MongoID> MoneyIds =
+        [
             "5449016a4bdc2d6f028b456f", //Roubles
             "5696686a4bdc2da3298b456a", //Dollars
             "569668774bdc2da2298b4568", //Euros
-        };
+        ];
 
-        private static readonly Dictionary<string, ItemsCount> _itemsCache = new Dictionary<string, ItemsCount>();
+        private static readonly Dictionary<MongoID, ItemsCount> _itemsCache = [];
 
         public class ItemsCount
         {
@@ -26,9 +25,9 @@ namespace AllQuestsCheckmarks.Helpers
             public int Total => Fir + NonFir;
         }
 
-        public static ItemsCount GetItemsInStash(string itemId)
+        public static ItemsCount GetItemsInStash(MongoID itemId)
         {
-            ItemsCount itemsCount = new ItemsCount();
+            ItemsCount itemsCount = new();
             Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
             IEnumerable<Item> items;
 
@@ -95,7 +94,7 @@ namespace AllQuestsCheckmarks.Helpers
                 }
                 else
                 {
-                    ItemsCount count = new ItemsCount();
+                    ItemsCount count = new();
 
                     if (item.MarkedAsSpawnedInSession)
                     {

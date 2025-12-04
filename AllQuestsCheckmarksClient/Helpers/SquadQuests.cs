@@ -1,24 +1,38 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-
+﻿using EFT;
 using EFT.InventoryLogic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     internal static class SquadQuests
     {
-        public static Dictionary<string, Dictionary<string, bool>> SquadQuestsDict = new Dictionary<string, Dictionary<string, bool>>();
-        private static Dictionary<string, string> _squadNicks = new Dictionary<string, string>();
-        private static Dictionary<string, JArray>? _squadData;
+        public static Dictionary<MongoID, Dictionary<MongoID, bool>> SquadQuestsDict = [];
+        private static Dictionary<MongoID, string> _squadNicks = [];
+        private static Dictionary<MongoID, List<Quest>>? _squadData;
 
         public static void LoadData(Dictionary<string, string> squadMembers)
         {
-            _squadNicks = new Dictionary<string, string>(squadMembers);
+            _squadNicks = [];
 
-            string response = RequestHandler.PostJson("/all-quests-checkmarks/active-quests", new JArray(_squadNicks.Keys).ToJson());
-            _squadData = JObject.Parse(response)?.ToObject<Dictionary<string, JArray>>();
+            foreach (var (key, value) in squadMembers)
+            {
+                if (!AQCUtils.IsValidMongoID(key))
+                {
+                    Plugin.LogSource?.LogError($"Invalid MongoID for coop player: {key}");
+                    continue;
+                }
 
+                _squadNicks.Add(new MongoID(key), value);
+            }
+
+            string response = RequestHandler.PostJson("/all-quests-checkmarks/active-quests", new JArray(squadMembers.Keys).ToJson());
+            _squadData = JsonConvert.DeserializeObject<Dictionary<MongoID, List<Quest>>>(response, JsonSettingsProvider.Settings);
+
+            Plugin.LogDebug(response);
 
             if (_squadData == null)
             {
@@ -34,22 +48,23 @@ namespace AllQuestsCheckmarks.Helpers
         {
             SquadQuestsDict.Clear();
 
-            foreach(KeyValuePair<string, JArray> keyValuePair in _squadData!)
+            foreach(KeyValuePair<MongoID, List<Quest>> keyValuePair in _squadData!)
             {
-                keyValuePair.Deconstruct(out string profileId, out JArray questsData);
+                keyValuePair.Deconstruct(out MongoID profileId, out List<Quest> questsData);
 
-                Dictionary<string, bool> playerQuests = new Dictionary<string, bool>();
+                Dictionary<MongoID, bool> playerQuests = [];
                 SquadQuestsDict.Add(profileId, playerQuests);
 
                 for (int i = 0; i < questsData.Count; ++i)
                 {
-                    if(!(questsData[i] is JObject quest) || !(quest["_id"]?.ToString() is string questId))
+                    Quest quest = questsData[i];
+                    if (quest.Id is not MongoID questId)
                     {
                         Plugin.LogSource?.LogError($"Failed to parse quest for player {profileId}!");
                         continue;
                     }
 
-                    if (!(quest["conditions"]?["AvailableForFinish"] is JArray finishConditions))
+                    if (quest.Conditions?.AvailableForFinish is not List<AvailableForFinishCondition> finishConditions)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing finish conditions!");
                         continue;
@@ -57,27 +72,29 @@ namespace AllQuestsCheckmarks.Helpers
 
                     for (int j = 0; j < finishConditions.Count; ++j)
                     {
-
-                        if (!(finishConditions[j] is JObject condition) || !(condition["conditionType"]?.ToString() is string conditionType))
+                        AvailableForFinishCondition condition = finishConditions[j];
+                        if (condition.ConditionType is not string conditionType)
                         {
-                            Plugin.LogSource?.LogError($"Quest {questId} is missing finish condition #{j} or its conditionType!");
+                            Plugin.LogSource?.LogError($"Quest {questId} condition #{j} is missing conditionType!");
                             continue;
                         }
 
-                        bool fir = condition["onlyFoundInRaid"]?.ToString() == "True";
+                        bool fir = condition.OnlyFoundInRaid is true;
 
                         if (conditionType != "HandoverItem" && conditionType != "FindItem" && conditionType != "LeaveItemAtLocation")
                         {
                             continue;
                         }
 
-                        if (!(condition["target"]?.ToObject<List<string>>() is List<string> targets))
+                        if (condition.Target is not List<string> targetsRaw)
                         {
                             Plugin.LogSource?.LogError($"Quest {questId} condition #{j} is missing targets!");
                             continue;
                         }
 
-                        foreach (string itemId in targets)
+                        List<MongoID> targets = [.. targetsRaw.Where(AQCUtils.IsValidMongoID).Select(t => new MongoID(t))];
+
+                        foreach (MongoID itemId in targets)
                         {
                             if (conditionType != "HandoverItem" && QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
                             {
@@ -102,11 +119,11 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static bool IsNeededForSquadMembers(Item item, out List<string> members)
         {
-            members = new List<string>();
+            members = [];
 
-            foreach(KeyValuePair<string, Dictionary<string, bool>> keyValuePair in SquadQuestsDict)
+            foreach(KeyValuePair<MongoID, Dictionary<MongoID, bool>> keyValuePair in SquadQuestsDict)
             {
-                keyValuePair.Deconstruct(out string profileId, out Dictionary<string, bool> items);
+                keyValuePair.Deconstruct(out MongoID profileId, out Dictionary<MongoID, bool> items);
 
                 if (items.TryGetValue(item.TemplateId, out bool fir) &&
                     (!fir || item.MarkedAsSpawnedInSession) &&

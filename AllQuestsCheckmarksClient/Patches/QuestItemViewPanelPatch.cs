@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-
+﻿using AllQuestsCheckmarks.Helpers;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
@@ -9,11 +7,11 @@ using EFT.UI.DragAndDrop;
 using HarmonyLib;
 using JetBrains.Annotations;
 using SPT.Reflection.Patching;
+using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
-using AllQuestsCheckmarks.Helpers;
 
 namespace AllQuestsCheckmarks.Patches
 {
@@ -67,12 +65,12 @@ namespace AllQuestsCheckmarks.Patches
             bool useCustomTextColors = Settings.CustomTextColors!.Value;
             string indent = Settings.BulletPoints!.Value ? "  · " : "  ";
 
-            if (QuestsHelper.GetActiveQuestsWithItem(profile, item, out Dictionary<string, QuestsHelper.CurrentQuest> activeQuests,
-                out Dictionary<string, QuestsHelper.CurrentQuest> fulfilled))
+            if (QuestsHelper.GetActiveQuestsWithItem(profile, item, out Dictionary<MongoID, QuestsHelper.CurrentQuest> activeQuests,
+                out Dictionary<MongoID, QuestsHelper.CurrentQuest> fulfilled))
             {
                 string activeColor = useCustomTextColors ? Settings.ActiveQuestTextColor!.Hex : "#dd831a";
 
-                foreach (KeyValuePair<string, QuestsHelper.CurrentQuest> keyValuePair in activeQuests)
+                foreach (KeyValuePair<MongoID, QuestsHelper.CurrentQuest> keyValuePair in activeQuests)
                 {
                     keyValuePair.Deconstruct(out _, out QuestsHelper.CurrentQuest quest);
 
@@ -119,7 +117,7 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
-            foreach (KeyValuePair<string, QuestsHelper.CurrentQuest> keyValuePair in fulfilled)
+            foreach (KeyValuePair<MongoID, QuestsHelper.CurrentQuest> keyValuePair in fulfilled)
             {
                 keyValuePair.Deconstruct(out _, out QuestsHelper.CurrentQuest quest);
 
@@ -140,7 +138,7 @@ namespace AllQuestsCheckmarks.Patches
                 totalNeededFir = itemData.Fir - handedOverFir;
                 totalNeededNonFir = itemData.NonFir - handedOverNonFir;
 
-                foreach (KeyValuePair<string, QuestsData.QuestValues> quest in itemData.Quests)
+                foreach (KeyValuePair<MongoID, QuestsData.QuestValues> quest in itemData.Quests)
                 {
                     if (activeQuests.ContainsKey(quest.Key) || fulfilled.ContainsKey(quest.Key))
                     {

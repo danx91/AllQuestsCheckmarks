@@ -8,11 +8,12 @@ namespace AllQuestsCheckmarks.Helpers
 {
     internal static class Settings
     {
-        private static readonly Color _fallbackColor = new Color(0, 0, 0, 0);
-        private static readonly List<ColorEntry> _allColors = new List<ColorEntry>();
+        private static readonly Color _fallbackColor = new(0, 0, 0, 0);
+        private static readonly List<ColorEntry> _allColors = [];
 
         public static ConfigEntry<bool>? IncludeCollector;
         public static ConfigEntry<bool>? IncludeLoyaltyRegain;
+        public static ConfigEntry<bool>? IncludeUnreachable;
         public static ConfigEntry<bool>? IncludeNonFir;
         public static ConfigEntry<bool>? HideFulfilled;
         public static ConfigEntry<bool>? OnlyActiveQuests;
@@ -71,6 +72,7 @@ namespace AllQuestsCheckmarks.Helpers
             int generalIndex = 99;
             int colorsIndex = 199;
             int textIndex = 299;
+            int debugIndex = 999;
 
             /*
              * GENERAL
@@ -101,6 +103,16 @@ namespace AllQuestsCheckmarks.Helpers
                 false,
                 MakeDescription(
                     "Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)",
+                    generalIndex--
+                )
+            );
+
+            IncludeUnreachable = config.Bind(
+                "1. General",
+                "Include unreachable quests",
+                false,
+                MakeDescription(
+                    "Whether or not to include quests that are unreachable (event quests and quests for other account types)",
                     generalIndex--
                 )
             );
@@ -275,7 +287,22 @@ namespace AllQuestsCheckmarks.Helpers
                 "9. Debug",
                 "Debug logs",
                 false,
-                "Log debug info to Player.log"
+                MakeDescription(
+                    "Enable debug logs in Player.log",
+                    debugIndex--
+                )
+            );
+
+            config.BindButton(
+                "9. Debug",
+                "Reload quests data",
+                "Reload",
+                "Reload quests data from server",
+                debugIndex--,
+                () =>
+                {
+                    QuestsData.LoadData();
+                }
             );
 
             foreach (ColorEntry color in _allColors)
@@ -309,6 +336,23 @@ namespace AllQuestsCheckmarks.Helpers
                     IsAdvanced = false,
                     Order = order,
                 }
+            );
+        }
+
+        public static void BindButton(this ConfigFile config, string section, string key, string text, string description, int order, Action action)
+        {
+            config.Bind(section, key, "",
+                new ConfigDescription(description, null, new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = entry =>
+                    {
+                        if (GUILayout.Button(text, GUILayout.ExpandWidth(true)))
+                        {
+                            action();
+                        }
+                    },
+                    Order = order,
+                })
             );
         }
 
@@ -350,7 +394,7 @@ namespace AllQuestsCheckmarks.Helpers
 
             if (hexValue.StartsWith("#"))
             {
-                hexValue = hexValue.Substring(1);
+                hexValue = hexValue[1..];
             }
 
             if (!int.TryParse(hexValue, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int numValue))

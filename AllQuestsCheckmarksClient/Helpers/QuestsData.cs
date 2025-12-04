@@ -1,36 +1,24 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-
+﻿using EFT;
+using Newtonsoft.Json;
 using SPT.Common.Http;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     internal static class QuestsData
     {
-        public class QuestItems
+        public class QuestItems(int count, bool fir)
         {
-            public int Count;
-            public bool Fir;
-
-            public QuestItems(int count, bool fir)
-            {
-                Count = count;
-                Fir = fir;
-            }
+            public int Count = count;
+            public bool Fir = fir;
         }
 
-        public class QuestValues
+        public class QuestValues(int count, bool isFir, string name, string localizedName)
         {
-            public QuestItems Count;
-            public string Name;
-            public string LocalizedName;
-
-            public QuestValues(int count, bool isFir, string name, string localizedName)
-            {
-                Count = new QuestItems(count, isFir);
-                Name = name;
-                LocalizedName = localizedName;
-            }
+            public QuestItems Count = new(count, isFir);
+            public string Name = name;
+            public string LocalizedName = localizedName;
         }
 
         public class ItemData
@@ -38,32 +26,29 @@ namespace AllQuestsCheckmarks.Helpers
             public int Fir;
             public int NonFir;
             public int Total => Fir + NonFir;
-            public Dictionary<string, QuestValues> Quests = new Dictionary<string, QuestValues>();
+            public Dictionary<MongoID, QuestValues> Quests = [];
         }
 
-        public class QuestRequirements
+        public class QuestRequirements(MongoID questId)
         {
-            public string QuestId;
-            public List<QuestRequirements> List = new List<QuestRequirements>();
-
-            public QuestRequirements(string questId)
-            {
-                QuestId = questId;
-            }
+            public MongoID QuestId = questId;
+            public List<QuestRequirements> List = [];
         }
 
-        private static JArray? _questsData;
-        private static readonly List<string> _unreachableQuests = new List<string>();
+        private static List<QuestJson>? _questsData;
+        private static readonly List<MongoID> _unreachableQuests = [];
 
-        public static Dictionary<string, ItemData> QuestItemsByItemId = new Dictionary<string, ItemData>();
-        public static Dictionary<string, Dictionary<string, QuestItems>> QuestItemsByQuestId = new Dictionary<string, Dictionary<string, QuestItems>>();
+        public static Dictionary<MongoID, ItemData> QuestItemsByItemId = [];
+        public static Dictionary<MongoID, Dictionary<MongoID, QuestItems>> QuestItemsByQuestId = [];
 
         public static async void LoadData()
         {
             Plugin.LogSource?.LogInfo("Requesting quests data...");
 
             string response = await RequestHandler.GetJsonAsync("/all-quests-checkmarks/quests");
-            _questsData = JArray.Parse(response);
+            _questsData = JsonConvert.DeserializeObject<List<QuestJson>>(response, JsonSettingsProvider.Settings);
+
+            Plugin.LogDebug(response);
 
             if (_questsData == null)
             {
@@ -80,25 +65,32 @@ namespace AllQuestsCheckmarks.Helpers
         {
             _unreachableQuests.Clear();
 
-            Dictionary<string, QuestRequirements> dependencyList = new Dictionary<string, QuestRequirements>();
-            List<string> allQuestIds = new List<string>();
-            List<string> unreachableRootQuestIds = new List<string>();
+            if(Settings.IncludeUnreachable!.Value)
+            {
+                Plugin.LogDebug("Including unreachable quests - skip check");
+                return;
+            }
+
+            Dictionary<MongoID, QuestRequirements> dependencyList = [];
+            List<MongoID> allQuestIds = [];
+            List<MongoID> unreachableRootQuestIds = [];
 
             for (int i = 0; i < _questsData!.Count; ++i)
             {
-                if (!(_questsData[i] is JObject quest2) || !(quest2["Quest"] is JObject quest))
+                QuestJson quest2 = _questsData[i];
+                if (quest2.Quest is not Quest quest)
                 {
                     Plugin.LogSource?.LogError("Quest is null!");
                     continue;
                 }
 
-                if (!(quest["_id"]?.ToString() is string questId))
+                if (quest.Id is not MongoID questId)
                 {
-                    Plugin.LogSource?.LogError("Quest[_id] is null!");
+                    Plugin.LogSource?.LogError("Quest.Id is null!");
                     continue;
                 }
 
-                if (!(quest["conditions"]?["AvailableForStart"] is JArray startConditions))
+                if (quest.Conditions?.AvailableForStart is not List<AvailableForStartCondition> startConditions)
                 {
                     Plugin.LogSource?.LogError($"Quest {questId} is missing start conditions!");
                     continue;
@@ -106,7 +98,7 @@ namespace AllQuestsCheckmarks.Helpers
 
                 allQuestIds.Add(questId);
 
-                if (quest2["IsUnreachable"]?.ToString() == "True")
+                if (quest2.IsUnreachable is true)
                 {
                     unreachableRootQuestIds.Add(questId);
                 }
@@ -119,13 +111,9 @@ namespace AllQuestsCheckmarks.Helpers
                 
                 for (int j = 0; j < startConditions.Count; ++j)
                 {
-                    if (!(startConditions[j] is JObject condition))
-                    {
-                        Plugin.LogSource?.LogError($"Quest {questId} is missing start condition #{j}!");
-                        continue;
-                    }
+                    AvailableForStartCondition condition = startConditions[j];
                     
-                    if (!(condition["conditionType"]?.ToString() is string conditionType))
+                    if (condition.ConditionType is not string conditionType)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing start condition #{j} conditionType!");
                         continue;
@@ -136,11 +124,19 @@ namespace AllQuestsCheckmarks.Helpers
                         continue;
                     }
                     
-                    if (!(condition["target"]?.ToString() is string requirementId))
+                    if (condition.Target is not string requirementIdRaw)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing start condition #{j} target!");
                         continue;
                     }
+
+                    if (!AQCUtils.IsValidMongoID(requirementIdRaw))
+                    {
+                        Plugin.LogDebug($"Quest {questId} start condition #{j} has non-MongoID target: ${requirementIdRaw}!");
+                        continue;
+                    }
+
+                    MongoID requirementId = requirementIdRaw;
 
                     if (!dependencyList.TryGetValue(requirementId, out QuestRequirements requirement))
                     {
@@ -152,9 +148,9 @@ namespace AllQuestsCheckmarks.Helpers
                 }
             }
 
-            Dictionary<string, bool> cache = new Dictionary<string, bool>();
+            Dictionary<MongoID, bool> cache = [];
 
-            foreach (string questId in allQuestIds)
+            foreach (MongoID questId in allQuestIds)
             {
                 if (IsQuestUnreachable(dependencyList[questId], unreachableRootQuestIds, cache))
                 {
@@ -164,9 +160,9 @@ namespace AllQuestsCheckmarks.Helpers
             }
         }
 
-        private static bool IsQuestUnreachable(QuestRequirements requirements, List<string> unreachableRoot, Dictionary<string, bool> cache, Stack<string>? stack = null)
+        private static bool IsQuestUnreachable(QuestRequirements requirements, List<MongoID> unreachableRoot, Dictionary<MongoID, bool> cache, Stack<MongoID>? stack = null)
         {
-            stack ??= new Stack<string>();
+            stack ??= new();
 
             //Check for circular dependency - assume reachable
             if (stack.Contains(requirements.QuestId))
@@ -226,13 +222,14 @@ namespace AllQuestsCheckmarks.Helpers
 
             for (int i = 0; i < _questsData!.Count; ++i)
             {
-                if (!(_questsData[i] is JObject quest2) || !(quest2["Quest"] is JObject quest))
+                QuestJson quest2 = _questsData[i];
+                if (quest2.Quest is not Quest quest)
                 {
                     Plugin.LogSource?.LogError("Quest is null!");
                     continue;
                 }
 
-                if(!(quest["_id"]?.ToString() is string questId))
+                if(quest.Id is not MongoID questId)
                 {
                     Plugin.LogSource?.LogError("Quest[_id] is null!");
                     continue;
@@ -243,7 +240,7 @@ namespace AllQuestsCheckmarks.Helpers
                     continue;
                 }
 
-                if (!(quest["conditions"]?["AvailableForFinish"] is JArray finishConditions))
+                if (quest.Conditions?.AvailableForFinish is not List<AvailableForFinishCondition> finishConditions)
                 {
                     Plugin.LogSource?.LogError($"Quest {questId} is missing finish conditions!");
                     continue;
@@ -262,14 +259,15 @@ namespace AllQuestsCheckmarks.Helpers
                 
                 for(int j = 0; j < finishConditions.Count; ++j)
                 {
-                    if (!(finishConditions[j] is JObject condition) || !(condition["conditionType"]?.ToString() is string conditionType))
+                    AvailableForFinishCondition condition = finishConditions[j];
+                    if (condition.ConditionType is not string conditionType)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing finish condition #{j} or its conditionType!");
                         continue;
                     }
 
                     bool isLeaveAtLocation = conditionType == "LeaveItemAtLocation";
-                    bool fir = condition["onlyFoundInRaid"]?.ToString() == "True";
+                    bool fir = condition.OnlyFoundInRaid is true;
 
                     if (conditionType != "HandoverItem" && conditionType != "FindItem" && !isLeaveAtLocation)
                     {
@@ -282,19 +280,21 @@ namespace AllQuestsCheckmarks.Helpers
                         continue;
                     }
 
-                    if (!(condition["target"]?.ToObject<List<string>>() is List<string> targets))
+                    if (condition.Target is not List<string> targetsRaw)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} condition #{j} is missing targets!");
                         continue;
                     }
 
-                    if (!int.TryParse(condition["value"]?.ToString(), out int count))
+                    List<MongoID> targets = [.. targetsRaw.Where(AQCUtils.IsValidMongoID).Select(t => new MongoID(t))];
+
+                    if (condition.Value is not int count)
                     {
-                        Plugin.LogSource?.LogError($"Quest {questId} condition #{j} failed to parse 'value' as int!");
+                        Plugin.LogSource?.LogError($"Quest {questId} condition #{j} is missing count");
                         continue;
                     }
 
-                    foreach(string itemId in targets)
+                    foreach(MongoID itemId in targets)
                     {
                         if(conditionType != "HandoverItem" && QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
                         {
@@ -307,17 +307,18 @@ namespace AllQuestsCheckmarks.Helpers
                             continue;
                         }
 
-                        AddItem(itemId, count, fir, isLeaveAtLocation, questId, quest["QuestName"]?.ToString(), quest["name"]?.ToString());
+                        AddItem(itemId, count, fir, isLeaveAtLocation, questId, quest.QuestName, quest.LocalizedName);
                     }
                 }
             }
         }
 
-        private static bool HasItemInFindOrHandover(string itemId, JArray conditions)
+        private static bool HasItemInFindOrHandover(MongoID itemId, List<AvailableForFinishCondition> conditions)
         {
             for (int i = 0; i < conditions.Count; ++i)
             {
-                if(!(conditions[i] is JObject condition) || !(condition["conditionType"]?.ToString() is string conditionType))
+                AvailableForFinishCondition condition = conditions[i];
+                if (condition.ConditionType is not string conditionType)
                 {
                     Plugin.LogSource?.LogError("Condition is null or missing conditionType!");
                     continue;
@@ -328,11 +329,13 @@ namespace AllQuestsCheckmarks.Helpers
                     continue;
                 }
 
-                if (!(condition["target"]?.ToObject<List<string>>() is List<string> targets))
+                if (condition.Target is not List<string> targetsRaw)
                 {
                     Plugin.LogSource?.LogError("Condition is missing targets!");
                     continue;
                 }
+
+                List<MongoID> targets = [.. targetsRaw.Where(AQCUtils.IsValidMongoID).Select(t => new MongoID(t))];
 
                 if (targets.Contains(itemId))
                 {
@@ -342,12 +345,12 @@ namespace AllQuestsCheckmarks.Helpers
 
             return false;
         }
-        public static void AddItem(string itemId, int count, bool fir, bool skipCheck, string questId, string? questName, string? questLocalizedName)
+        public static void AddItem(MongoID itemId, int count, bool fir, bool skipCheck, MongoID questId, string? questName, string? questLocalizedName)
         {
             //Add to quest list
-            if(!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
+            if(!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<MongoID, QuestItems> questItems))
             {
-                questItems = new Dictionary<string, QuestItems>();
+                questItems = [];
                 QuestItemsByQuestId.Add(questId, questItems);
             }
 
@@ -400,19 +403,19 @@ namespace AllQuestsCheckmarks.Helpers
             }
         }
 
-        public static void RemoveQuest(string questId)
+        public static void RemoveQuest(MongoID questId)
         {
             Plugin.LogDebug($"Removing quest {questId}");
 
-            if (!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<string, QuestItems> questItems))
+            if (!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<MongoID, QuestItems> questItems))
             {
                 Plugin.LogSource?.LogError($"Attempted to remove non-existing quest {questId} from quest data!");
                 return;
             }
 
-            foreach(KeyValuePair<string, QuestItems> item in questItems)
+            foreach(KeyValuePair<MongoID, QuestItems> item in questItems)
             {
-                item.Deconstruct(out string itemId, out QuestItems items);
+                item.Deconstruct(out MongoID itemId, out QuestItems items);
 
                 if(!QuestItemsByItemId.TryGetValue(itemId, out ItemData itemData))
                 {

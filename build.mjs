@@ -26,6 +26,7 @@ for (const dest in config.dest) {
 console.log("Copying all files")
 for (const [src, dest] of Object.entries(config.files)) {
 	if (fs.lstatSync(src).isDirectory()) {
+		
 		const dstDir = "tmp/" + config.dest[dest] + path.basename(src) + "/"
 		fs.mkdirSync(dstDir, {recursive: true})
 
@@ -40,7 +41,16 @@ for (const [src, dest] of Object.entries(config.files)) {
 			}
 		})
 	} else {
-		const dst = "tmp/" + config.dest[dest] + path.basename(src)
+		let dest_path, rename
+
+		if (Array.isArray(dest)) {
+			dest_path = dest[0]
+			rename = dest[1]
+		} else {
+			dest_path = dest
+		}
+
+		const dst = "tmp/" + config.dest[dest_path] + (rename ?? path.basename(src))
 		console.log(`\t Copy ${src} -> ${dst}`)
 		fs.cpSync(src, dst, {recursive: true})
 	}

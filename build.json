@@ -1,21 +1,19 @@
 {
 	"info":{
 		"name": "allquestscheckmarks",
-		"version": "1.2.4",
-		"spt": "3.11"
+		"version": "1.3.0",
+		"spt": "4.0"
 	},
 	"dest": {
 		"client": "BepInEx/plugins/AllQuestsCheckmarks/",
-		"server": "user/mods/zgfuedkx-allquestscheckmarks/"
+		"server": "SPT/user/mods/AllQuestsCheckmarks/"
 	},
 	"files": {
-		"AllQuestsCheckmarks-Server/package.json": "server",
-		"AllQuestsCheckmarks-Server/src": "server",
-		"AllQuestsCheckmarks-Core/bin/Release/AllQuestsCheckmarks.dll": "client",
-		"AllQuestsCheckmarks-Fika/bin/Release/AllQuestsCheckmarks-Fika.dll": "client",
-		"AllQuestsCheckmarks-MoreCheckmarks/bin/Release/AllQuestsCheckmarks-MoreCheckmarks.dll": "client",
-		"AllQuestsCheckmarks-Core/locales": "client",
-		"AllQuestsCheckmarks-Core/Assets/AllQuestsCheckmarksAssets": "client"
+		"AllQuestsCheckmarksServer/bin/Release/net9.0/AllQuestsCheckmarks-Server.dll": "server",
+		"AllQuestsCheckmarksClient/bin/Release/netstandard2.1/AllQuestsCheckmarks-Client.dll": "client",
+		"AllQuestsCheckmarksFika/bin/Release/netstandard2.1/AllQuestsCheckmarks-Fika.dll": "client",
+		"AllQuestsCheckmarksClient/locales": "client",
+		"AllQuestsCheckmarksClient/Assets/Bundle": ["client", "AllQuestsCheckmarksAssets"]
 	},
 	"ignore": [
 		"**/*.md"

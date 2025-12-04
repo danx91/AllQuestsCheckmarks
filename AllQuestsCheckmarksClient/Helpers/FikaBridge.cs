@@ -6,9 +6,9 @@ namespace AllQuestsCheckmarks.Helpers
 {
     public static class FikaBridge
     {
-        public static event Action RaidFinishedEvent;
-        public static event Action BuildCacheEvent;
-        public static event Action<Dictionary<string, string>> CoopPlayersEvent;
+        public static event Action? RaidFinishedEvent;
+        public static event Action? BuildCacheEvent;
+        public static event Action<Dictionary<string, string>>? CoopPlayersEvent;
 
         public static void Init()
         {
@@ -25,19 +25,19 @@ namespace AllQuestsCheckmarks.Helpers
         public static void InvokeRaidFinishedEvent()
         {
             Plugin.LogDebug("InvokeRaidFinishedEvent");
-            RaidFinishedEvent.Invoke();
+            RaidFinishedEvent?.Invoke();
         }
 
         public static void InvokeCoopPlayersEvent(Dictionary<string, string> players)
         {
             Plugin.LogDebug("InvokeCoopPlayersEvent");
-            CoopPlayersEvent.Invoke(players);
+            CoopPlayersEvent?.Invoke(players);
         }
 
         public static void InvokeBuildCacheEvent()
         {
             Plugin.LogDebug("InvokeBuildCacheEvent");
-            BuildCacheEvent.Invoke();
+            BuildCacheEvent?.Invoke();
         }
 
         private static bool TryInitFika()
@@ -52,7 +52,7 @@ namespace AllQuestsCheckmarks.Helpers
             }
             catch (Exception e)
             {
-                Plugin.LogSource.LogError($"Failed to load AllQuestsCheckmarks-Fika.dll! : {e}");
+                Plugin.LogSource?.LogError($"Failed to load AllQuestsCheckmarks-Fika.dll! : {e}");
                 return false;
             }
 

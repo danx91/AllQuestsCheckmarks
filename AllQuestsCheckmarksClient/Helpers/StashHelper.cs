@@ -34,15 +34,16 @@ namespace AllQuestsCheckmarks.Helpers
 
             if (QuestsHelper.IsInRaid())
             {
-                if (_itemsCache != null && 
-                    _itemsCache.TryGetValue(itemId, out ItemsCount cached))
+                if (_itemsCache != null && _itemsCache.TryGetValue(itemId, out ItemsCount cached))
                 {
                     itemsCount.Fir += cached.Fir;
                     itemsCount.NonFir += cached.NonFir;
                 }
 
-                if (!Settings.IncludeRaidItems.Value)
+                if (!Settings.IncludeRaidItems!.Value)
+                {
                     return itemsCount;
+                }
 
                 items = profile.Inventory.GetPlayerItems(EPlayerItems.Equipment | EPlayerItems.QuestItems).Where(i => i.TemplateId == itemId);
             }
@@ -54,9 +55,13 @@ namespace AllQuestsCheckmarks.Helpers
             foreach (Item item in items)
             {
                 if (item.MarkedAsSpawnedInSession)
+                {
                     itemsCount.Fir += item.StackObjectsCount;
+                }
                 else
+                {
                     itemsCount.NonFir += item.StackObjectsCount;
+                }
             }
 
             return itemsCount;
@@ -68,34 +73,44 @@ namespace AllQuestsCheckmarks.Helpers
 
             Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
             IEnumerable<Item> itemsToCache = profile.Inventory.GetPlayerItems(EPlayerItems.HideoutStashes);
-            IEnumerable<Item> stashItems = Singleton<HideoutClass>.Instance?.AllStashItems;
+            IEnumerable<Item>? stashItems = Singleton<HideoutClass>.Instance?.AllStashItems;
 
             if (stashItems != null)
+            {
                 itemsToCache = itemsToCache.Concat(stashItems);
+            }
 
             foreach (Item item in itemsToCache)
             {
                 if (_itemsCache.TryGetValue(item.TemplateId, out ItemsCount itemsCount))
                 {
                     if (item.MarkedAsSpawnedInSession)
+                    {
                         itemsCount.Fir += item.StackObjectsCount;
+                    }
                     else
+                    {
                         itemsCount.NonFir += item.StackObjectsCount;
+                    }
                 }
                 else
                 {
                     ItemsCount count = new ItemsCount();
 
                     if (item.MarkedAsSpawnedInSession)
+                    {
                         count.Fir = item.StackObjectsCount;
+                    }
                     else
+                    {
                         count.NonFir = item.StackObjectsCount;
+                    }
 
                     _itemsCache.Add(item.TemplateId, count);
                 }
             }
 
-            Plugin.LogSource.LogInfo($"Items cache built. Total items in cache: {_itemsCache.Count}");
+            Plugin.LogSource?.LogInfo($"Items cache built. Total items in cache: {_itemsCache.Count}");
         }
     }
 }

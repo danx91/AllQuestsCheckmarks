@@ -25,7 +25,7 @@ namespace AllQuestsCheckmarks.Patches
         [PatchPostfix]
         static void Postfix(QuestClass __instance, EQuestStatus __state)
         {
-            if(__instance.QuestStatus == __state)
+            if (__instance.QuestStatus == __state)
             {
                 return;
             }

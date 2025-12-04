@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllQuestsCheckmarksClient", "AllQuestsCheckmarksClient.csproj", "{B311CBD2-953B-4B6D-9EE6-94337C7357DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B311CBD2-953B-4B6D-9EE6-94337C7357DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B311CBD2-953B-4B6D-9EE6-94337C7357DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B311CBD2-953B-4B6D-9EE6-94337C7357DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B311CBD2-953B-4B6D-9EE6-94337C7357DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3D45CC4-B0C8-46A5-A556-30171A533F75}
+	EndGlobalSection
+EndGlobal

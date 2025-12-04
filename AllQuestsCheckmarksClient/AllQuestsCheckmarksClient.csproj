@@ -15,10 +15,13 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="set &quot;dest=$(ProjectDir)..\..\..\BepInEx\plugins\AllQuestsCheckmarks&quot;&#xD;&#xA;mkdir %25dest%25&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;%25dest%25\$(TargetFileName)" />
+    <Exec Command="set &quot;dest=$(ProjectDir)..\..\..\BepInEx\plugins\$(RootNamespace)&quot;&#xD;&#xA;set &quot;dest_locales=%25dest%25\locales&quot;&#xD;&#xA;if not exist &quot;%25dest%25\&quot; mkdir &quot;%25dest%25\&quot;&#xD;&#xA;if not exist &quot;%25dest_locales%25&quot; mkdir &quot;%25dest_locales%25&quot;&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;%25dest%25\$(TargetFileName)&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\Assets\Bundle&quot; &quot;%25dest%25\$(RootNamespace)Assets&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\locales\&quot; &quot;%25dest_locales%25\" />
   </Target>
 
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>

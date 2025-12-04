@@ -11,17 +11,15 @@ using AllQuestsCheckmarks.Patches;
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("ZGFueDkx.AllQuestCheckmarks", "AllQuestsCheckmarks", "1.2.4"),
-        BepInDependency("com.SPT.core", "3.11.0"),
+        BepInPlugin("com.zgfuedkx.allquestscheckmarks", "AllQuestsCheckmarks", "1.3.0"),
+        BepInDependency("com.SPT.core", "4.0.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
-        BepInDependency("VIP.TommySoucy.MoreCheckmarks", BepInDependency.DependencyFlags.SoftDependency)
     ]
     public class Plugin : BaseUnityPlugin
     {
-        public static ManualLogSource LogSource;
+        public static ManualLogSource? LogSource;
         public static bool isFikaInstalled = false;
-        public static bool isMoreCheckmarksInstalled = false;
-        public static string modPath;
+        public static string? modPath;
 
         public void Awake()
         {
@@ -31,7 +29,6 @@ namespace AllQuestsCheckmarks
             modPath.Replace("\\", "/");
 
             isFikaInstalled = Chainloader.PluginInfos.ContainsKey("com.fika.core");
-            isMoreCheckmarksInstalled = Chainloader.PluginInfos.ContainsKey("VIP.TommySoucy.MoreCheckmarks");
 
             Settings.Init(Config);
             Assets.LoadAssets();
@@ -45,11 +42,6 @@ namespace AllQuestsCheckmarks
                 new LocalGameStartPatch().Enable();
             }
 
-            if (isMoreCheckmarksInstalled)
-            {
-                MoreCheckmarksBridge.Init();
-            }
-
             new QuestClassPatch().Enable();
             new ProfileSelectionPatch().Enable();
             new QuestItemViewPanelPatch().Enable();
@@ -61,12 +53,10 @@ namespace AllQuestsCheckmarks
 
         public static void LogDebug(string msg)
         {
-            if (!Settings.ShowDebug.Value)
+            if (Settings.ShowDebug!.Value)
             {
-                return;
+                LogSource?.LogDebug(msg);
             }
-
-            LogSource.LogDebug(msg);
         }
     }
 }

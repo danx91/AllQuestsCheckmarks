@@ -7,7 +7,7 @@ namespace AllQuestsCheckmarks.Fika
         public static void Init()
         {
             FikaEventSubscriber.Init();
-            Plugin.LogSource.LogInfo("AllQuestsCheckmarks Fika module loaded");
+            Plugin.LogSource?.LogInfo("AllQuestsCheckmarks Fika module loaded");
         }
     }
 }

@@ -30,7 +30,7 @@ namespace AllQuestsCheckmarks.Patches
             }
             catch
             {
-                Plugin.LogSource.LogError("Failed to set custom checkmark in ItemSpecificationPanel!");
+                Plugin.LogSource?.LogError("Failed to set custom checkmark in ItemSpecificationPanel!");
             }
 
             return true;

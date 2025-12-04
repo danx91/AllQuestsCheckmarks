@@ -4,7 +4,7 @@ namespace AllQuestsCheckmarks.Helpers
 {
     internal static class Assets
     {
-        public static Sprite Checkmark;
+        public static Sprite? Checkmark;
 
         public static void LoadAssets()
         {
@@ -12,13 +12,13 @@ namespace AllQuestsCheckmarks.Helpers
 
             if(bundle == null)
             {
-                Plugin.LogSource.LogError("Failed to load asset bundle!");
+                Plugin.LogSource?.LogError("Failed to load asset bundle!");
                 return;
             }
 
             Checkmark = bundle.LoadAsset<Sprite>("checkmark");
 
-            Plugin.LogSource.LogInfo("Assets loaded");
+            Plugin.LogSource?.LogInfo("Assets loaded");
         }
     }
 

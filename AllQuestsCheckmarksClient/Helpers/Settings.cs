@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using BepInEx.Configuration;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-
-using BepInEx.Configuration;
 using UnityEngine;
 
 namespace AllQuestsCheckmarks.Helpers
@@ -11,34 +11,28 @@ namespace AllQuestsCheckmarks.Helpers
         private static readonly Color _fallbackColor = new Color(0, 0, 0, 0);
         private static readonly List<ColorEntry> _allColors = new List<ColorEntry>();
 
-        public static ConfigEntry<bool> IncludeCollector;
-        public static ConfigEntry<bool> IncludeLoyaltyRegain;
-        public static ConfigEntry<bool> IncludeNonFir;
-        public static ConfigEntry<bool> HideFulfilled;
-        public static ConfigEntry<bool> OnlyActiveQuests;
-        public static ConfigEntry<bool> IncludeRaidItems;
-        public static ConfigEntry<bool> SquadQuests;
-        public static ConfigEntry<bool> MarkEnoughItems;
-        public static ConfigEntry<bool> UseCustomQuestColor;
-        public static ConfigEntry<bool> BulletPoints;
-        public static ConfigEntry<bool> CustomTextColors;
-        public static ConfigEntry<bool> MoreCheckmarksHideout;
-        public static ConfigEntry<bool> MoreCheckmarksHideoutIncludeTotal;
-        public static ConfigEntry<bool> MoreCheckmarksBarters;
-        public static ConfigEntry<bool> MoreCheckmarksBartersCheckmark;
-        public static ConfigEntry<bool> ShowDebug;
+        public static ConfigEntry<bool>? IncludeCollector;
+        public static ConfigEntry<bool>? IncludeLoyaltyRegain;
+        public static ConfigEntry<bool>? IncludeNonFir;
+        public static ConfigEntry<bool>? HideFulfilled;
+        public static ConfigEntry<bool>? OnlyActiveQuests;
+        public static ConfigEntry<bool>? IncludeRaidItems;
+        public static ConfigEntry<bool>? SquadQuests;
+        public static ConfigEntry<bool>? MarkEnoughItems;
+        public static ConfigEntry<bool>? UseCustomQuestColor;
+        public static ConfigEntry<bool>? BulletPoints;
+        public static ConfigEntry<bool>? CustomTextColors;
+        public static ConfigEntry<bool>? ShowDebug;
 
-        public static ColorEntry CheckmarkColor;
-        public static ColorEntry NonFirColor;
-        public static ColorEntry CollectorColor;
-        public static ColorEntry EnoughItemsColor;
-        public static ColorEntry CustomQuestColor;
-        public static ColorEntry SquadColor;
-        public static ColorEntry ActiveQuestTextColor;
-        public static ColorEntry FutureQuestTextColor;
-        public static ColorEntry SquadQuestTextColor;
-        public static ColorEntry MoreCheckmarksHideoutColor;
-        public static ColorEntry MoreCheckmarksBartersColor;
+        public static ColorEntry? CheckmarkColor;
+        public static ColorEntry? NonFirColor;
+        public static ColorEntry? CollectorColor;
+        public static ColorEntry? EnoughItemsColor;
+        public static ColorEntry? CustomQuestColor;
+        public static ColorEntry? SquadColor;
+        public static ColorEntry? ActiveQuestTextColor;
+        public static ColorEntry? FutureQuestTextColor;
+        public static ColorEntry? SquadQuestTextColor;
 
         public class ColorEntry
         {
@@ -275,70 +269,6 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             /*
-             * MoreCheckmarks
-             */
-            if (Plugin.isMoreCheckmarksInstalled)
-            {
-                int moreCheckmarksIndex = 399;
-
-                MoreCheckmarksHideout = config.Bind(
-                    "4. MoreCheckmarks",
-                    "Include hideout upgrades",
-                    true,
-                    MakeDescription(
-                        "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod",
-                        moreCheckmarksIndex--
-                    )
-                );
-
-                MoreCheckmarksHideoutIncludeTotal = config.Bind(
-                    "4. MoreCheckmarks",
-                    "Include hideout upgrades in Total needed",
-                    true,
-                    MakeDescription(
-                        "Whether or not to include items required for hideout upgrades from MoreCheckmarks mod in 'Total needed' count",
-                        moreCheckmarksIndex--
-                    )
-                );
-
-                MoreCheckmarksHideoutColor = config.BindColor(
-                    "4. MoreCheckmarks",
-                    "Hideout upgrades color",
-                    "#0000ff",
-                    "Color of checkmark for items required for hideout upgrades",
-                    moreCheckmarksIndex--
-                );
-
-                MoreCheckmarksBarters = config.Bind(
-                   "4. MoreCheckmarks",
-                   "Include barters",
-                   true,
-                   MakeDescription(
-                       "Whether or not to include items required for barters from MoreCheckmarks mod",
-                       moreCheckmarksIndex--
-                   )
-                );
-
-                MoreCheckmarksBartersCheckmark = config.Bind(
-                   "4. MoreCheckmarks",
-                   "Show checkmark for barter items",
-                   true,
-                   MakeDescription(
-                       "Whether or not to show checkmark for barter items from MoreCheckmarks mod",
-                       moreCheckmarksIndex--
-                   )
-                );
-
-                MoreCheckmarksBartersColor = config.BindColor(
-                    "4. MoreCheckmarks",
-                    "Barter color",
-                    "#00ffff",
-                    "Color of checkmark for items required for barters",
-                    moreCheckmarksIndex--
-                );
-            }
-
-            /*
              * DEBUG
              */
             ShowDebug = config.Bind(
@@ -354,7 +284,7 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             config.SettingChanged += SettingChanged;
-            Plugin.LogSource.LogInfo("Settings loaded");
+            Plugin.LogSource?.LogInfo("Settings loaded");
         }
 
         private static void SettingChanged(object sender, SettingChangedEventArgs args)
@@ -398,7 +328,7 @@ namespace AllQuestsCheckmarks.Helpers
 
                 if(strNums.Length != 3)
                 {
-                    Plugin.LogSource.LogWarning("Failed to convert color! (RGB)");
+                    Plugin.LogSource?.LogWarning("Failed to convert color! (RGB)");
                     return defaultColor;
                 }
 
@@ -408,7 +338,7 @@ namespace AllQuestsCheckmarks.Helpers
                 {
                     if (!int.TryParse(strNums[i], out int result))
                     {
-                        Plugin.LogSource.LogWarning("Failed to convert hex color to color! (RGB parse)");
+                        Plugin.LogSource?.LogWarning("Failed to convert hex color to color! (RGB parse)");
                         return defaultColor;
                     }
 
@@ -425,7 +355,7 @@ namespace AllQuestsCheckmarks.Helpers
 
             if (!int.TryParse(hexValue, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int numValue))
             {
-                Plugin.LogSource.LogWarning("Failed to convert color! (HEX)");
+                Plugin.LogSource?.LogWarning("Failed to convert color! (HEX)");
                 return defaultColor;
             }
 

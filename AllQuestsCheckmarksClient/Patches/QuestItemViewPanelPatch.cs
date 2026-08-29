@@ -12,6 +12,7 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ZGFueDkx.ZGCLib.Config;
 
 namespace AllQuestsCheckmarks.Patches
 {
@@ -24,7 +25,7 @@ namespace AllQuestsCheckmarks.Patches
 
         [PatchPrefix]
         static bool Prefix(Profile profile, Item item, [CanBeNull] SimpleTooltip tooltip, QuestItemViewPanel __instance, Image ____questIconImage,
-            Sprite ____foundInRaidSprite, Sprite ____questItemSprite, ref string ___string_5, ref SimpleTooltip ___simpleTooltip_0, TextMeshProUGUI ____questItemLabel)
+            Sprite ____foundInRaidSprite, Sprite ____questItemSprite, ref string ____tooltipText, ref SimpleTooltip ____tooltip, TextMeshProUGUI ____questItemLabel)
         {
             __instance.HideGameObject();
 
@@ -37,17 +38,17 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
-            ___simpleTooltip_0 = tooltip;
-            ___string_5 = "";
+            ____tooltip = tooltip;
+            ____tooltipText = "";
 
             if (item.MarkedAsSpawnedInSession)
             {
-                ___string_5 = "Item found in raid".Localized(null) + "\n";
+                ____tooltipText = "Item found in raid".Localized(null) + "\n";
             }
 
             bool showNonFir = Settings.IncludeNonFir!.Value;
             StashHelper.ItemsCount inStash = StashHelper.GetItemsInStash(item.TemplateId);
-            ___string_5 += string.Format("aqc_in_stash".Localized(null), inStash.Total, inStash.Fir);
+            ____tooltipText += string.Format("aqc_in_stash".Localized(null), inStash.Total, inStash.Fir);
 
             bool neededForActive = false;
             bool neededForFuture = false;
@@ -68,13 +69,13 @@ namespace AllQuestsCheckmarks.Patches
             if (QuestsHelper.GetActiveQuestsWithItem(profile, item, out Dictionary<MongoID, QuestsHelper.CurrentQuest> activeQuests,
                 out Dictionary<MongoID, QuestsHelper.CurrentQuest> fulfilled))
             {
-                string activeColor = useCustomTextColors ? Settings.ActiveQuestTextColor!.Hex : "#dd831a";
+                string activeColor = Settings.ActiveQuestTextColor!.GetHexColor(!useCustomTextColors);
 
                 foreach (KeyValuePair<MongoID, QuestsHelper.CurrentQuest> keyValuePair in activeQuests)
                 {
                     keyValuePair.Deconstruct(out _, out QuestsHelper.CurrentQuest quest);
 
-                    if(showNonFir || item.QuestItem || quest.Condition.onlyFoundInRaid)
+                    if (showNonFir || item.QuestItem || quest.Condition.onlyFoundInRaid)
                     {
                         if (!neededForActive)
                         {
@@ -90,22 +91,22 @@ namespace AllQuestsCheckmarks.Patches
                     activeQuestsTooltip += $"\n{indent}<color={activeColor}>{quest.Template.Name}</color>: ";
 
                     if (quest.Condition is ConditionHandoverItem condition
-                        && profile.TaskConditionCounters.TryGetValue(condition.id, out TaskConditionCounterClass counter))
+                        && profile.TaskConditionCounters.TryGetValue(condition.id, out TaskConditionCounter counter))
                     {
                         if (condition.onlyFoundInRaid)
                         {
                             handedOverFir += counter.Value;
-                            totalNeededFir += (int) condition.value - counter.Value;
+                            totalNeededFir += (int)condition.value - counter.Value;
                         }
                         else
                         {
                             handedOverNonFir += counter.Value;
-                            totalNeededNonFir += (int) condition.value - counter.Value;
+                            totalNeededNonFir += (int)condition.value - counter.Value;
                         }
 
                         activeQuestsTooltip += $"{counter.Value}/{condition.value}";
 
-                        if(showNonFir)
+                        if (showNonFir)
                         {
                             activeQuestsTooltip += " " + (condition.onlyFoundInRaid ? "aqc_fir" : "aqc_nonfir").Localized(null);
                         }
@@ -123,17 +124,17 @@ namespace AllQuestsCheckmarks.Patches
 
                 if (quest.Condition.onlyFoundInRaid)
                 {
-                    handedOverFir += (int) quest.Condition.value;
+                    handedOverFir += (int)quest.Condition.value;
                 }
                 else
                 {
-                    handedOverNonFir += (int) quest.Condition.value;
+                    handedOverNonFir += (int)quest.Condition.value;
                 }
             }
 
             if (!Settings.OnlyActiveQuests!.Value && QuestsHelper.IsNeededForActiveOrFutureQuests(item, out QuestsData.ItemData itemData))
             {
-                string futureColor = useCustomTextColors ? Settings.FutureQuestTextColor!.Hex : "#d24dff";
+                string futureColor = Settings.FutureQuestTextColor!.GetHexColor(!useCustomTextColors);
 
                 totalNeededFir = itemData.Fir - handedOverFir;
                 totalNeededNonFir = itemData.NonFir - handedOverNonFir;
@@ -151,13 +152,13 @@ namespace AllQuestsCheckmarks.Patches
                         futureQuestsTooltip = "\n" + "aqc_future_quests".Localized();
                     }
 
-                    if(quest.Key != QuestsHelper.COLLECTOR_ID)
+                    if (quest.Key != QuestsHelper.COLLECTOR_ID)
                     {
                         collectorOnly = false;
                     }
 
                     string questName = quest.Value.LocalizedName.Localized(null);
-                    if(questName == quest.Value.LocalizedName)
+                    if (questName == quest.Value.LocalizedName)
                     {
                         if (questName.IsNullOrEmpty())
                         {
@@ -178,29 +179,29 @@ namespace AllQuestsCheckmarks.Patches
                 }
             }
 
-            if(totalNeededFir > 0 || showNonFir && totalNeededNonFir > 0)
+            if (totalNeededFir > 0 || showNonFir && totalNeededNonFir > 0)
             {
-                ___string_5 += "\n" + string.Format((showNonFir ? "aqc_total_needed_alt" : "aqc_total_needed").Localized(null),
+                ____tooltipText += "\n" + string.Format((showNonFir ? "aqc_total_needed_alt" : "aqc_total_needed").Localized(null),
                        totalNeededFir, totalNeededNonFir);
             }
 
-            ___string_5 += activeQuestsTooltip + futureQuestsTooltip;
+            ____tooltipText += activeQuestsTooltip + futureQuestsTooltip;
 
             if (Plugin.isFikaInstalled && Settings.SquadQuests!.Value && SquadQuests.IsNeededForSquadMembers(item, out List<string> members))
             {
-                string squadColor = useCustomTextColors ? Settings.SquadQuestTextColor!.Hex : "#ffc299";
+                string squadColor = Settings.SquadQuestTextColor!.GetHexColor(!useCustomTextColors);
 
                 neededForFriend = true;
-                ___string_5 += "\n" + "aqc_squad_quests".Localized(null);
+                ____tooltipText += "\n" + "aqc_squad_quests".Localized(null);
 
-                foreach(string nick in members)
+                foreach (string nick in members)
                 {
-                    ___string_5 += $"\n{indent}<color={squadColor}>{nick}</color>";
+                    ____tooltipText += $"\n{indent}<color={squadColor}>{nick}</color>";
                 }
             }
 
             int leftFir = inStash.Fir - totalNeededFir;
-            switch(QuestsHelper.GetCheckmarkStatus(neededForActive, neededForFuture, neededForFriend, item.MarkedAsSpawnedInSession,
+            switch (QuestsHelper.GetCheckmarkStatus(neededForActive, neededForFuture, neededForFriend, item.MarkedAsSpawnedInSession,
                 leftFir >= 0 && inStash.NonFir + leftFir - totalNeededNonFir >= 0, collectorOnly))
             {
                 case QuestsHelper.ECheckmarkStatus.Fir:
@@ -209,7 +210,7 @@ namespace AllQuestsCheckmarks.Patches
                 case QuestsHelper.ECheckmarkStatus.Active:
                     if (Settings.UseCustomQuestColor!.Value)
                     {
-                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.CustomQuestColor!.Color);
+                        QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.CustomQuestColor!.GetValue());
                     }
                     else
                     {
@@ -218,16 +219,16 @@ namespace AllQuestsCheckmarks.Patches
                     break;
                 case QuestsHelper.ECheckmarkStatus.Future:
                     QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite,
-                        item.MarkedAsSpawnedInSession ? Settings.CheckmarkColor!.Color : Settings.NonFirColor!.Color);
+                        item.MarkedAsSpawnedInSession ? Settings.CheckmarkColor!.GetValue() : Settings.NonFirColor!.GetValue());
                     break;
                 case QuestsHelper.ECheckmarkStatus.Squad:
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.SquadColor!.Color);
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.SquadColor!.GetValue());
                     break;
                 case QuestsHelper.ECheckmarkStatus.Fulfilled:
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.EnoughItemsColor!.Color);
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.EnoughItemsColor!.GetValue());
                     break;
                 case QuestsHelper.ECheckmarkStatus.Collector:
-                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.CollectorColor!.Color);
+                    QuestsHelper.SetCheckmark(__instance, ____questIconImage, ____foundInRaidSprite, Settings.CollectorColor!.GetValue());
                     break;
                 case QuestsHelper.ECheckmarkStatus.None:
                     break;

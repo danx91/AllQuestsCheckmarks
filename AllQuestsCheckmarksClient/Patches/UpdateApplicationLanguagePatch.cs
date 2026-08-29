@@ -1,4 +1,5 @@
 ﻿using AllQuestsCheckmarks.Helpers;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -9,13 +10,13 @@ namespace AllQuestsCheckmarks.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(LocaleManagerClass), nameof(LocaleManagerClass.UpdateApplicationLanguage));
+            return AccessTools.Method(typeof(LocalizationManager), nameof(LocalizationManager.UpdateApplicationLanguage));
         }
 
         [PatchPostfix]
         static void Postfix()
         {
-            Locales.LoadLocale(LocaleManagerClass.LocaleManagerClass.String_0);
+            Locales.LoadLocale(LocalizationManager.Instance.Culture);
         }
     }
 }

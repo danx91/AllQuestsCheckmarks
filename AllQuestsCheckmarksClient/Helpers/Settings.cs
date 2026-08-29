@@ -1,16 +1,11 @@
 ﻿using BepInEx.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
+using ZGFueDkx.ZGCLib.Config;
 
 namespace AllQuestsCheckmarks.Helpers
 {
     internal static class Settings
     {
-        private static readonly Color _fallbackColor = new(0, 0, 0, 0);
-        private static readonly List<ColorEntry> _allColors = [];
-
         public static ConfigEntry<bool>? IncludeCollector;
         public static ConfigEntry<bool>? IncludeLoyaltyRegain;
         public static ConfigEntry<bool>? IncludeUnreachable;
@@ -25,290 +20,181 @@ namespace AllQuestsCheckmarks.Helpers
         public static ConfigEntry<bool>? CustomTextColors;
         public static ConfigEntry<bool>? ShowDebug;
 
-        public static ColorEntry? CheckmarkColor;
-        public static ColorEntry? NonFirColor;
-        public static ColorEntry? CollectorColor;
-        public static ColorEntry? EnoughItemsColor;
-        public static ColorEntry? CustomQuestColor;
-        public static ColorEntry? SquadColor;
-        public static ColorEntry? ActiveQuestTextColor;
-        public static ColorEntry? FutureQuestTextColor;
-        public static ColorEntry? SquadQuestTextColor;
-
-        public class ColorEntry
-        {
-            public ConfigEntry<string> Entry;
-            public Color Color;
-            public string Hex;
-
-            private Color _color;
-
-            public ColorEntry(ConfigEntry<string> entry, Color color)
-            {
-                this.Entry = entry;
-                this._color = color;
-                this.Color = color;
-                this.Hex = ColorToHex(color);
-
-                entry.SettingChanged += delegate
-                {
-                    Parse();
-                };
-
-                _allColors.Add(this);
-            }
-
-            public void Parse()
-            {
-                this.Color = ParseColor(Entry.Value, _color);
-                this.Hex = ColorToHex(Color);
-
-                Plugin.LogDebug($"Color parsed: {Entry.Definition.Key}, color: {this.Color}, hex: {this.Hex}");
-            }
-        }
+        public static ConfigEntry<Color>? CheckmarkColor;
+        public static ConfigEntry<Color>? NonFirColor;
+        public static ConfigEntry<Color>? CollectorColor;
+        public static ConfigEntry<Color>? EnoughItemsColor;
+        public static ConfigEntry<Color>? CustomQuestColor;
+        public static ConfigEntry<Color>? SquadColor;
+        public static ConfigEntry<Color>? ActiveQuestTextColor;
+        public static ConfigEntry<Color>? FutureQuestTextColor;
+        public static ConfigEntry<Color>? SquadQuestTextColor;
 
         public static void Init(ConfigFile config)
         {
-            int generalIndex = 99;
-            int colorsIndex = 199;
-            int textIndex = 299;
-            int debugIndex = 999;
+            ConfigCategory general = config.MakeCategory(1, "General");
+            ConfigCategory colors = config.MakeCategory(2, "Colors");
+            ConfigCategory text = config.MakeCategory(3, "Text");
+            ConfigCategory debug = config.MakeCategory(9, "Debug");
 
             /*
              * GENERAL
              */
-            IncludeCollector = config.Bind(
-                "1. General",
+            IncludeCollector = general.BindConfig(
                 "Include Collector quest (Fence)",
                 true,
-                MakeDescription(
-                    "Whether or not to include items needed for Collector quest",
-                    generalIndex--
-                )
+                "Whether or not to include items needed for Collector quest"
             );
 
-            IncludeNonFir = config.Bind(
-                "1. General",
-                "Include non-FiR quest",
+            IncludeNonFir = general.BindConfig(
+                "Include non-FiR quests",
                 true,
-                MakeDescription(
-                    "Whether or not to include quests that don't require found in raid items",
-                    generalIndex--
-                )
+                "Whether or not to include quests that don't require found in raid items"
             );
 
-            IncludeLoyaltyRegain = config.Bind(
-                "1. General",
+            IncludeLoyaltyRegain = general.BindConfig(
                 "Include loyalty regain quests",
                 false,
-                MakeDescription(
-                    "Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)",
-                    generalIndex--
-                )
+                "Whether or not to include quests for regaining loyalty (Compensation for Damage (Fence), Make Amends (Lightkeeper) & Chemical questline finale)"
             );
 
-            IncludeUnreachable = config.Bind(
-                "1. General",
+            IncludeUnreachable = general.BindConfig(
                 "Include unreachable quests",
                 false,
-                MakeDescription(
-                    "Whether or not to include quests that are unreachable (event quests and quests for other account types)",
-                    generalIndex--
-                )
+                "Whether or not to include quests that are unreachable (event quests and quests for other account types)"
             );
 
-            HideFulfilled = config.Bind(
-                "1. General",
+            HideFulfilled = general.BindConfig(
                 "Hide checkmark if have enough (in raid)",
                 false,
-                MakeDescription(
-                    "Whether or not to hide checkmark in raid on items that you have enough for all active and future quests. Be careful when using with " +
-                        "'Include items in PMC inventory (in raid)', as this combo may hide checkmarks while still in raid!",
-                    generalIndex--
-                )
+                "Whether or not to hide checkmark in raid on items that you have enough for all active and future quests. Be careful when using with " +
+                    "'Include items in PMC inventory (in raid)', as this combo may hide checkmarks while still in raid!"
             );
 
-            OnlyActiveQuests = config.Bind(
-                "1. General",
+            OnlyActiveQuests = general.BindConfig(
                 "Show only active quests",
                 false,
-                MakeDescription(
-                    "Whether or not to show only active quests (no future quests)",
-                    generalIndex--
-                )
+                "Whether or not to show only active quests (no future quests)"
             );
 
-            IncludeRaidItems = config.Bind(
-                "1. General",
+            IncludeRaidItems = general.BindConfig(
                 "Include items in PMC inventory (in raid)",
                 false,
-                MakeDescription(
-                    "Whether or not to include items in PMC inventory while in raid in 'In Stash' count",
-                    generalIndex--
-                )
+                "Whether or not to include items in PMC inventory while in raid in 'In Stash' count"
             );
 
             /*
              * COLORS
              */
-            CheckmarkColor = config.BindColor(
-                "2. Colors",
+            CheckmarkColor = colors.BindColor(
                 "Checkmark color",
                 "#bf00ff",
-                "Color of checkmark if item is not currently needed but is required for future quests",
-                colorsIndex--
+                "Color of checkmark if item is not currently needed but is required for future quests"
             );
 
-            NonFirColor = config.BindColor(
-                "2. Colors",
+            NonFirColor = colors.BindColor(
                 "Checkmark color (non-FIR)",
                 "#73264d",
-                "Color of checkmark if non-FiR item is not currently needed but is required for future quests",
-                colorsIndex--
+                "Color of checkmark if non-FiR item is not currently needed but is required for future quests"
             );
 
-            CollectorColor = config.BindColor(
-                "2. Colors",
+            CollectorColor = colors.BindColor(
                 "Collector color",
                 "#bf00ff",
-                "Color of checkmark for collector quest",
-                colorsIndex--
+                "Color of checkmark for collector quest"
             );
 
-            MarkEnoughItems = config.Bind(
-                "2. Colors",
+            MarkEnoughItems = colors.BindConfig(
                 "Use different color if have enough",
                 false,
-                MakeDescription(
-                    "Whether or not to use different checkmark color if you have enough items for all quests. " +
-                        "'Hide checkmark if have enough' option will hide this checkmark while in raid",
-                    generalIndex--
-                )
+                "Whether or not to use different checkmark color if you have enough items for all quests. " +
+                    "'Hide checkmark if have enough' option will hide this checkmark while in raid"
             );
 
-            EnoughItemsColor = config.BindColor(
-                "2. Colors",
+            EnoughItemsColor = colors.BindColor(
                 "Have enough color",
                 "#00ff00",
-                "Color of checkmark if you have enough items for all quests",
-                colorsIndex--
+                "Color of checkmark if you have enough items for all quests"
             );
 
-            UseCustomQuestColor = config.Bind(
-                "2. Colors",
+            UseCustomQuestColor = colors.BindConfig(
                 "Use custom quest checkmark color",
                 false,
-                MakeDescription(
-                    "Whether or not to use custom checkmark color for active quests",
-                    generalIndex--
-                )
+                "Whether or not to use custom checkmark color for active quests"
             );
 
-            CustomQuestColor = config.BindColor(
-                "2. Colors",
+            CustomQuestColor = colors.BindColor(
                 "Custom quest color",
                 "#ffeb6d",
-                "Custom color of default quest checkmark",
-                colorsIndex--
+                "Custom color of default quest checkmark"
             );
 
             /*
              * TEXT
              */
-            BulletPoints = config.Bind(
-                "3. Text",
+            BulletPoints = text.BindConfig(
                 "Use bullet points",
                 true,
-                MakeDescription(
-                    "Whether or not to use bullet points in quests list",
-                    textIndex--
-                )
+                "Whether or not to use bullet points in quests list"
             );
 
-            CustomTextColors = config.Bind(
-                "3. Text",
+            CustomTextColors = text.BindConfig(
                 "Use custom text colors",
                 false,
-                MakeDescription(
-                    "Whether or not to use custom text colors",
-                    textIndex--
-                )
+                "Whether or not to use custom text colors"
             );
 
-            ActiveQuestTextColor = config.BindColor(
-                "3. Text",
+            ActiveQuestTextColor = text.BindColor(
                 "Custom text color - active quests",
                 "#dd831a",
-                "Custom color of active quests text",
-                textIndex--
+                "Custom color of active quests text"
             );
 
-            FutureQuestTextColor = config.BindColor(
-                "3. Text",
+            FutureQuestTextColor = text.BindColor(
                 "Custom text color - future quests",
                 "#d24dff",
-                "Custom color of future quests text",
-                textIndex--
+                "Custom color of future quests text"
             );
 
             if (Plugin.isFikaInstalled)
             {
-                SquadQuests = config.Bind(
-                    "1. General",
+                SquadQuests = general.BindConfig(
                     "Mark squad members quests",
                     true,
-                    MakeDescription(
-                        "Wether or not to mark items currently needed for players in your squad",
-                        generalIndex--
-                    )
+                    "Wether or not to mark items currently needed for players in your squad"
                 );
 
-                SquadColor = config.BindColor(
-                    "2. Colors",
+                SquadColor = colors.BindColor(
                     "Checkmark color (squad members)",
                     "#ff3333",
-                    "Color of checkmark if item is not currently needed but is required for one of your squad members",
-                    colorsIndex--
+                    "Color of checkmark if item is not currently needed but is required for one of your squad members"
                 );
 
-                SquadQuestTextColor = config.BindColor(
-                    "3. Text",
+                SquadQuestTextColor = text.BindColor(
                     "Custom text color - squad quests",
                     "#ffc299",
-                    "Custom color of squad quests text",
-                    textIndex--
+                    "Custom color of squad quests text"
                 );
             }
 
             /*
              * DEBUG
              */
-            ShowDebug = config.Bind(
-                "9. Debug",
+            ShowDebug = debug.BindConfig(
                 "Debug logs",
                 false,
-                MakeDescription(
-                    "Enable debug logs in Player.log",
-                    debugIndex--
-                )
+                "Enable debug logs in Player.log"
             );
 
-            config.BindButton(
-                "9. Debug",
+            debug.BindButton(
                 "Reload quests data",
                 "Reload",
                 "Reload quests data from server",
-                debugIndex--,
                 () =>
                 {
                     QuestsData.LoadData();
                 }
             );
-
-            foreach (ColorEntry color in _allColors)
-            {
-                color.Parse();
-            }
 
             config.SettingChanged += SettingChanged;
             Plugin.LogSource?.LogInfo("Settings loaded");
@@ -324,98 +210,6 @@ namespace AllQuestsCheckmarks.Helpers
                     QuestsData.LoadData();
                     break;
             }
-        }
-
-        private static ConfigDescription MakeDescription(string description, int order)
-        {
-            return new ConfigDescription(
-                description,
-                null,
-                new ConfigurationManagerAttributes
-                {
-                    IsAdvanced = false,
-                    Order = order,
-                }
-            );
-        }
-
-        public static void BindButton(this ConfigFile config, string section, string key, string text, string description, int order, Action action)
-        {
-            config.Bind(section, key, "",
-                new ConfigDescription(description, null, new ConfigurationManagerAttributes
-                {
-                    CustomDrawer = entry =>
-                    {
-                        if (GUILayout.Button(text, GUILayout.ExpandWidth(true)))
-                        {
-                            action();
-                        }
-                    },
-                    Order = order,
-                })
-            );
-        }
-
-        private static ColorEntry BindColor(this ConfigFile config, string section, string key, string color, string description, int order)
-        {
-            return new ColorEntry(
-                config.Bind(section, key, color, MakeDescription(description + " (either HEX #ffffff or RGB 255,255,255)", order)),
-                ParseColor(color, _fallbackColor)
-            );
-        }
-
-        private static Color ParseColor(string hexValue, Color defaultColor)
-        {
-            if (hexValue.IndexOf(",") != -1)
-            {
-                string[] strNums = hexValue.Split(',');
-
-                if(strNums.Length != 3)
-                {
-                    Plugin.LogSource?.LogWarning("Failed to convert color! (RGB)");
-                    return defaultColor;
-                }
-
-                float[] nums = new float[3];
-
-                for(int i = 0; i < 3; ++i)
-                {
-                    if (!int.TryParse(strNums[i], out int result))
-                    {
-                        Plugin.LogSource?.LogWarning("Failed to convert hex color to color! (RGB parse)");
-                        return defaultColor;
-                    }
-
-                    nums[i] = (result / 255.0f);
-                }
-
-                return new Color(nums[0], nums[1], nums[2]);
-            }
-
-            if (hexValue.StartsWith("#"))
-            {
-                hexValue = hexValue[1..];
-            }
-
-            if (!int.TryParse(hexValue, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out int numValue))
-            {
-                Plugin.LogSource?.LogWarning("Failed to convert color! (HEX)");
-                return defaultColor;
-            }
-
-            return new Color(
-                ((numValue >> 16) & 0xFF ) / 255.0f,
-                ((numValue >> 8) & 0xFF) / 255.0f,
-                (numValue & 0xFF) / 255.0f,
-                1);
-        }
-
-        private static string ColorToHex(Color color)
-        {
-            return "#"
-                + ((int)(color.r * 255)).ToString("X").PadLeft(2, '0')
-                + ((int)(color.g * 255)).ToString("X").PadLeft(2, '0')
-                + ((int)(color.b * 255)).ToString("X").PadLeft(2, '0');
         }
     }
 }

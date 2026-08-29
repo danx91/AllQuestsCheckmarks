@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using EFT;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 
@@ -11,7 +12,7 @@ namespace AllQuestsCheckmarks.Helpers
 
         public static void LoadLocale(string localeId)
         {
-            if (_loadedLocales.Contains(localeId) || !LocaleManagerClass.LocaleManagerClass.ContainsCulture(localeId))
+            if (_loadedLocales.Contains(localeId) || !LocalizationManager.Instance.ContainsCulture(localeId))
             {
                 return;
             }
@@ -34,7 +35,7 @@ namespace AllQuestsCheckmarks.Helpers
                 }
                 else if (localeId != "en")
                 {
-                    foreach(KeyValuePair<string, string> englishEntry in _english)
+                    foreach (KeyValuePair<string, string> englishEntry in _english)
                     {
                         if (!localeDict.ContainsKey(englishEntry.Key))
                         {
@@ -51,7 +52,7 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             _loadedLocales.Add(localeId);
-            LocaleManagerClass.LocaleManagerClass.UpdateLocales(localeId, localeDict);
+            LocalizationManager.Instance.UpdateLocales(localeId, localeDict);
         }
 
         private static Dictionary<string, string> ReadLocale(string path)

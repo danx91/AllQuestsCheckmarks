@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Linq;
+using ZGFueDkx.ZGCLib.Helpers;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -30,11 +31,14 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             string response = RequestHandler.PostJson("/all-quests-checkmarks/active-quests", new JArray(squadMembers.Keys).ToJson());
-            _squadData = JsonConvert.DeserializeObject<Dictionary<MongoID, List<Quest>>>(response, JsonSettingsProvider.Settings);
+            _squadData = JsonConvert.DeserializeObject<Dictionary<MongoID, List<Quest>>>(
+                response,
+                JsonSettingsFactory.GetJsonSerializerSettings(Plugin.LogSource)
+            );
 
             Plugin.LogDebug(response);
 
-            if (_squadData == null)
+            if (_squadData is null)
             {
                 Plugin.LogSource?.LogError("Failed to parse _squadData!");
                 Plugin.LogSource?.LogError(response);
@@ -48,7 +52,7 @@ namespace AllQuestsCheckmarks.Helpers
         {
             SquadQuestsDict.Clear();
 
-            foreach(KeyValuePair<MongoID, List<Quest>> keyValuePair in _squadData!)
+            foreach (KeyValuePair<MongoID, List<Quest>> keyValuePair in _squadData!)
             {
                 keyValuePair.Deconstruct(out MongoID profileId, out List<Quest> questsData);
 
@@ -121,7 +125,7 @@ namespace AllQuestsCheckmarks.Helpers
         {
             members = [];
 
-            foreach(KeyValuePair<MongoID, Dictionary<MongoID, bool>> keyValuePair in SquadQuestsDict)
+            foreach (KeyValuePair<MongoID, Dictionary<MongoID, bool>> keyValuePair in SquadQuestsDict)
             {
                 keyValuePair.Deconstruct(out MongoID profileId, out Dictionary<MongoID, bool> items);
 

@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using EFT.UI.DragAndDrop;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ZGFueDkx.ZGCLib.helpers;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -48,21 +48,15 @@ namespace AllQuestsCheckmarks.Helpers
             Collector = 6
         }
 
-        public class CurrentQuest(RawQuestClass template, ConditionItem condition)
+        public class CurrentQuest(QuestTemplate template, ConditionItem condition)
         {
-            public RawQuestClass Template = template;
+            public QuestTemplate Template = template;
             public ConditionItem Condition = condition;
-        }
-
-        public static bool IsInRaid()
-        {
-            bool? inRaid = Singleton<AbstractGame>.Instance?.InRaid;
-            return inRaid.HasValue && inRaid.Value;
         }
 
         public static bool IsNeededForActiveOrFutureQuests(Item item, out QuestsData.ItemData quests)
         {
-            return QuestsData.QuestItemsByItemId.TryGetValue(item.TemplateId, out quests) && 
+            return QuestsData.QuestItemsByItemId.TryGetValue(item.TemplateId, out quests) &&
                    (item.MarkedAsSpawnedInSession && quests.Total > 0 || quests.NonFir > 0);
         }
 
@@ -73,42 +67,42 @@ namespace AllQuestsCheckmarks.Helpers
             activeQuests = [];
             fulfilled = [];
 
-            foreach(QuestDataClass questDataClass in profile.QuestsData)
+            foreach (QuestDataClass questDataClass in profile.QuestsData)
             {
-                if(questDataClass.Template == null || 
+                if (questDataClass.Template is null ||
                    (questDataClass.Status != EQuestStatus.Started && questDataClass.Status != EQuestStatus.AvailableForFinish))
                 {
                     continue;
                 }
 
-                foreach(KeyValuePair<EQuestStatus, GClass1631> keyValuePair in questDataClass.Template.Conditions)
+                foreach (KeyValuePair<EQuestStatus, ConditionCollection> keyValuePair in questDataClass.Template.Conditions)
                 {
-                    keyValuePair.Deconstruct(out _, out GClass1631 conditions);
+                    keyValuePair.Deconstruct(out _, out ConditionCollection conditions);
 
                     ConditionItem? tmpCondition = null;
                     bool isFulfilled = false;
 
-                    foreach(Condition condition in conditions)
+                    foreach (Condition condition in conditions)
                     {
                         if (condition is not ConditionItem conditionItem || !conditionItem.target.Contains(item.StringTemplateId))
                         {
                             continue;
                         }
-                        
+
                         isFulfilled = questDataClass.CompletedConditions.Contains(condition.id);
                         tmpCondition = conditionItem;
 
-                        if(conditionItem is ConditionHandoverItem)
+                        if (conditionItem is ConditionHandoverItem)
                         {
                             break;
                         }
                     }
 
-                    if (tmpCondition == null)
+                    if (tmpCondition is null)
                     {
                         continue;
                     }
-                    
+
                     if (isFulfilled)
                     {
                         fulfilled.Add(questDataClass.Template.Id, new CurrentQuest(questDataClass.Template, tmpCondition));
@@ -127,7 +121,7 @@ namespace AllQuestsCheckmarks.Helpers
                 }
             }
 
-            if(activeQuests.Count == 0)
+            if (activeQuests.Count == 0)
             {
                 return false;
             }
@@ -141,30 +135,30 @@ namespace AllQuestsCheckmarks.Helpers
             {
                 return activeNonFir || item.MarkedAsSpawnedInSession;
             }
-            
+
             foreach (KeyValuePair<MongoID, CurrentQuest> quest in new Dictionary<MongoID, CurrentQuest>(activeQuests))
             {
                 if (quest.Value.Condition is not ConditionWeaponAssembly conditionWeaponAssembly)
                 {
                     continue;
                 }
-                
+
                 if (Inventory.IsWeaponFitsCondition(weapon, conditionWeaponAssembly))
                 {
                     return true;
                 }
-                
+
                 activeQuests.Remove(quest.Key);
             }
 
             return activeNonFir || item.MarkedAsSpawnedInSession;
         }
-        
+
         public static ECheckmarkStatus GetCheckmarkStatus(bool active, bool future, bool squad, bool fir, bool enough, bool collector)
         {
             if (enough && (active || future))
             {
-                if(Settings.HideFulfilled!.Value && IsInRaid())
+                if (Settings.HideFulfilled!.Value && RaidUtils.IsInRaid())
                 {
                     return squad ? ECheckmarkStatus.Squad : fir ? ECheckmarkStatus.Fir : ECheckmarkStatus.None;
                 }

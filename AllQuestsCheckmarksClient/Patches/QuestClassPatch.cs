@@ -10,18 +10,18 @@ namespace AllQuestsCheckmarks.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(QuestClass), nameof(QuestClass.SetStatus));
+            return AccessTools.Method(typeof(EFT.Quests.Quest), nameof(EFT.Quests.Quest.SetStatus));
         }
 
         [PatchPrefix]
-        static bool Prefix(QuestClass __instance, ref EQuestStatus __state)
+        static bool Prefix(EFT.Quests.Quest __instance, ref EQuestStatus __state)
         {
             __state = __instance.QuestStatus;
             return true;
         }
 
         [PatchPostfix]
-        static void Postfix(QuestClass __instance, EQuestStatus __state)
+        static void Postfix(EFT.Quests.Quest __instance, EQuestStatus __state)
         {
             if (__instance.QuestStatus == __state)
             {
@@ -33,10 +33,10 @@ namespace AllQuestsCheckmarks.Patches
             switch (__instance.QuestStatus)
             {
                 case EQuestStatus.Started:
-                    if (__instance is GClass3996)
+                    if (__instance is DailyQuest)
                     {
-                       Plugin.LogDebug($"Repeatable quest {__instance.Template.Name} accepetd - reload quests");
-                       QuestsData.LoadData();
+                        Plugin.LogDebug($"Repeatable quest {__instance.Template.Name} accepetd - reload quests");
+                        QuestsData.LoadData();
                     }
                     break;
                 case EQuestStatus.AvailableForFinish:

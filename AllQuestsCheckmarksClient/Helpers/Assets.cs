@@ -10,7 +10,7 @@ namespace AllQuestsCheckmarks.Helpers
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(Plugin.modPath + "/AllQuestsCheckmarksAssets");
 
-            if(bundle == null)
+            if (bundle is null)
             {
                 Plugin.LogSource?.LogError("Failed to load asset bundle!");
                 return;

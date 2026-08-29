@@ -1,64 +1,11 @@
 ﻿using EFT;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using ZGFueDkx.ZGCLib.Helpers;
 
 namespace AllQuestsCheckmarks.Helpers
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    internal sealed class JsonIgnoreError : Attribute;
-
-    internal static class JsonSettingsProvider
-    {
-        public static readonly JsonSerializerSettings Settings = new()
-        {
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            NullValueHandling = NullValueHandling.Include,
-            Error = HandleError,
-        };
-
-        private static void HandleError(object sender, ErrorEventArgs args)
-        {
-            Plugin.LogDebug($"JSON Error at {args.ErrorContext.Path}: {args.ErrorContext.Error.Message}");
-
-            args.ErrorContext.Handled = true;
-
-            var currentObject = args.CurrentObject;
-            if (currentObject == null)
-            {
-                return;
-            }
-
-            PropertyInfo? property = FindProperty(currentObject.GetType(), args.ErrorContext.Path);
-            if (property != null)
-            {
-                JsonIgnoreError? ignoreAttr = property.GetCustomAttribute<JsonIgnoreError>(true);
-                if (ignoreAttr != null)
-                {
-                    return;
-                }
-            }
-
-            Plugin.LogSource?.LogError($"JSON Error at {args.ErrorContext.Path}: {args.ErrorContext.Error.Message}");
-        }
-
-        private static PropertyInfo? FindProperty(Type type, string path)
-        {
-            string raw = path.Split('.').Last();
-            string clean = raw.Split('[', ']')[0];
-
-            return type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .FirstOrDefault(prop =>
-                {
-                    var attr = prop.GetCustomAttribute<JsonPropertyAttribute>();
-                    return attr?.PropertyName == clean || prop.Name == clean;
-                });
-        }
-    }
-
     internal class QuestJson
     {
         public Quest? Quest { get; set; }
@@ -91,7 +38,7 @@ namespace AllQuestsCheckmarks.Helpers
         [JsonProperty("conditionType")]
         public string? ConditionType { get; set; }
 
-        [JsonProperty("target"), JsonIgnoreError]
+        [JsonProperty("target"), JsonUtils.JsonIgnoreError]
         public string? Target { get; set; }
     }
 
@@ -100,7 +47,7 @@ namespace AllQuestsCheckmarks.Helpers
         [JsonProperty("conditionType")]
         public string? ConditionType { get; set; }
 
-        [JsonProperty("target"), JsonIgnoreError]
+        [JsonProperty("target"), JsonUtils.JsonIgnoreError]
         public List<string>? Target { get; set; }
 
         [JsonProperty("onlyFoundInRaid")]

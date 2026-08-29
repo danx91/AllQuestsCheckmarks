@@ -1,9 +1,11 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Hideout;
 using EFT.InventoryLogic;
 using SPT.Reflection.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using ZGFueDkx.ZGCLib.helpers;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -31,7 +33,7 @@ namespace AllQuestsCheckmarks.Helpers
             Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
             IEnumerable<Item> items;
 
-            if (QuestsHelper.IsInRaid())
+            if (RaidUtils.IsInRaid())
             {
                 if (_itemsCache != null && _itemsCache.TryGetValue(itemId, out ItemsCount cached))
                 {
@@ -72,7 +74,7 @@ namespace AllQuestsCheckmarks.Helpers
 
             Profile profile = ClientAppUtils.GetClientApp().GetClientBackEndSession().Profile;
             IEnumerable<Item> itemsToCache = profile.Inventory.GetPlayerItems(EPlayerItems.HideoutStashes);
-            IEnumerable<Item>? stashItems = Singleton<HideoutClass>.Instance?.AllStashItems;
+            IEnumerable<Item>? stashItems = Singleton<HideoutRepresentation>.Instance?.AllStashItems;
 
             if (stashItems != null)
             {

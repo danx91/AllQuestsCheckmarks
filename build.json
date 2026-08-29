@@ -1,12 +1,12 @@
 {
 	"info":{
 		"name": "allquestscheckmarks",
-		"version": "1.3.1",
-		"spt": "4.0"
+		"version": "1.4.0",
+		"spt": "4.1"
 	},
 	"dest": {
 		"client": "BepInEx/plugins/AllQuestsCheckmarks/",
-		"server": "SPT/user/mods/AllQuestsCheckmarks/"
+		"server": "SPT_Runtime/user/mods/AllQuestsCheckmarks/"
 	},
 	"files": {
 		"AllQuestsCheckmarksServer/bin/Release/net9.0/AllQuestsCheckmarks-Server.dll": "server",

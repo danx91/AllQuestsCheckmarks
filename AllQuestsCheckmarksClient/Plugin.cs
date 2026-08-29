@@ -9,8 +9,8 @@ using System.Reflection;
 namespace AllQuestsCheckmarks
 {
     [
-        BepInPlugin("com.zgfuedkx.allquestscheckmarks", "AllQuestsCheckmarks", "1.3.1"),
-        BepInDependency("com.SPT.core", "4.0.0"),
+        BepInPlugin("com.zgfuedkx.allquestscheckmarks", "ZGFueDkx-AllQuestsCheckmarks", "1.4.0"),
+        BepInDependency("com.SPT.core", "4.1.0"),
         BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency),
     ]
     public class Plugin : BaseUnityPlugin
@@ -29,7 +29,7 @@ namespace AllQuestsCheckmarks
             isFikaInstalled = Chainloader.PluginInfos.ContainsKey("com.fika.core");
 
             Settings.Init(Config);
-            Assets.LoadAssets();
+            Helpers.Assets.LoadAssets();
 
             if (isFikaInstalled)
             {

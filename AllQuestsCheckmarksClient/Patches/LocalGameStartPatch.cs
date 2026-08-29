@@ -10,7 +10,7 @@ namespace AllQuestsCheckmarks.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(LocalGame), nameof(LocalGame.smethod_6));
+            return AccessTools.Method(typeof(LocalGame), nameof(LocalGame.Create));
         }
 
         [PatchPostfix]

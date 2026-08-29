@@ -15,7 +15,7 @@ namespace AllQuestsCheckmarks.Fika.Helpers
             {
                 Plugin.LogDebug("Fika Raid Started");
 
-                if(!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
                     Plugin.LogSource?.LogError("Failed to get Fika CoopHandler");
                     return;
@@ -23,15 +23,15 @@ namespace AllQuestsCheckmarks.Fika.Helpers
 
                 Dictionary<string, string> players = new Dictionary<string, string>();
 
-                foreach(FikaPlayer player in coopHandler.HumanPlayers)
+                foreach (FikaPlayer player in coopHandler.HumanPlayers)
                 {
-                    if(player != coopHandler.MyPlayer)
+                    if (player != coopHandler.MyPlayer)
                     {
                         players.Add(player.ProfileId, player.Profile.Nickname);
                     }
                 }
 
-                if(players.Count == 0)
+                if (players.Count == 0)
                 {
                     return;
                 }

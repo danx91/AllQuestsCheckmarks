@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Linq;
+using ZGFueDkx.ZGCLib.Helpers;
 
 namespace AllQuestsCheckmarks.Helpers
 {
@@ -41,16 +42,16 @@ namespace AllQuestsCheckmarks.Helpers
         public static Dictionary<MongoID, ItemData> QuestItemsByItemId = [];
         public static Dictionary<MongoID, Dictionary<MongoID, QuestItems>> QuestItemsByQuestId = [];
 
-        public static async void LoadData()
+        public static void LoadData()
         {
             Plugin.LogSource?.LogInfo("Requesting quests data...");
 
-            string response = await RequestHandler.GetJsonAsync("/all-quests-checkmarks/quests");
-            _questsData = JsonConvert.DeserializeObject<List<QuestJson>>(response, JsonSettingsProvider.Settings);
+            string response = RequestHandler.GetJson("/all-quests-checkmarks/quests");
+            _questsData = JsonConvert.DeserializeObject<List<QuestJson>>(response, JsonSettingsFactory.GetJsonSerializerSettings(Plugin.LogSource));
 
             Plugin.LogDebug(response);
 
-            if (_questsData == null)
+            if (_questsData is null)
             {
                 Plugin.LogSource?.LogError("Failed to parse _questData!");
                 Plugin.LogSource?.LogError(response);
@@ -65,7 +66,7 @@ namespace AllQuestsCheckmarks.Helpers
         {
             _unreachableQuests.Clear();
 
-            if(Settings.IncludeUnreachable!.Value)
+            if (Settings.IncludeUnreachable!.Value)
             {
                 Plugin.LogDebug("Including unreachable quests - skip check");
                 return;
@@ -108,11 +109,11 @@ namespace AllQuestsCheckmarks.Helpers
                     questRequirements = new QuestRequirements(questId);
                     dependencyList.Add(questId, questRequirements);
                 }
-                
+
                 for (int j = 0; j < startConditions.Count; ++j)
                 {
                     AvailableForStartCondition condition = startConditions[j];
-                    
+
                     if (condition.ConditionType is not string conditionType)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing start condition #{j} conditionType!");
@@ -123,7 +124,7 @@ namespace AllQuestsCheckmarks.Helpers
                     {
                         continue;
                     }
-                    
+
                     if (condition.Target is not string requirementIdRaw)
                     {
                         Plugin.LogSource?.LogError($"Quest {questId} is missing start condition #{j} target!");
@@ -203,7 +204,7 @@ namespace AllQuestsCheckmarks.Helpers
                     cache.Add(requirements.QuestId, true);
                     return true;
                 }
-                
+
             }
 
             //Pop current quest from stack
@@ -229,7 +230,7 @@ namespace AllQuestsCheckmarks.Helpers
                     continue;
                 }
 
-                if(quest.Id is not MongoID questId)
+                if (quest.Id is not MongoID questId)
                 {
                     Plugin.LogSource?.LogError("Quest[_id] is null!");
                     continue;
@@ -252,12 +253,12 @@ namespace AllQuestsCheckmarks.Helpers
                     continue;
                 }
 
-                if (!Settings.IncludeLoyaltyRegain!.Value &&  QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
+                if (!Settings.IncludeLoyaltyRegain!.Value && QuestsHelper.TRUST_REGAIN_QUESTS.Contains(questId))
                 {
-                    continue;    
+                    continue;
                 }
-                
-                for(int j = 0; j < finishConditions.Count; ++j)
+
+                for (int j = 0; j < finishConditions.Count; ++j)
                 {
                     AvailableForFinishCondition condition = finishConditions[j];
                     if (condition.ConditionType is not string conditionType)
@@ -294,14 +295,14 @@ namespace AllQuestsCheckmarks.Helpers
                         continue;
                     }
 
-                    foreach(MongoID itemId in targets)
+                    foreach (MongoID itemId in targets)
                     {
-                        if(conditionType != "HandoverItem" && QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
+                        if (conditionType != "HandoverItem" && QuestsHelper.SPECIAL_BLACKLIST.Contains(itemId))
                         {
                             continue;
                         }
 
-                        if(isLeaveAtLocation && HasItemInFindOrHandover(itemId, finishConditions))
+                        if (isLeaveAtLocation && HasItemInFindOrHandover(itemId, finishConditions))
                         {
                             Plugin.LogDebug($"Quest have both handover/find and leave (questId={questId}, itemId={itemId}, fir={fir})");
                             continue;
@@ -348,19 +349,19 @@ namespace AllQuestsCheckmarks.Helpers
         public static void AddItem(MongoID itemId, int count, bool fir, bool skipCheck, MongoID questId, string? questName, string? questLocalizedName)
         {
             //Add to quest list
-            if(!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<MongoID, QuestItems> questItems))
+            if (!QuestItemsByQuestId.TryGetValue(questId, out Dictionary<MongoID, QuestItems> questItems))
             {
                 questItems = [];
                 QuestItemsByQuestId.Add(questId, questItems);
             }
 
-            if(questItems.TryGetValue(itemId, out QuestItems q) && !skipCheck)
+            if (questItems.TryGetValue(itemId, out QuestItems q) && !skipCheck)
             {
                 Plugin.LogDebug($"Quest {questId} already has item {itemId} - skip");
                 return;
             }
 
-            if(q != null)
+            if (q != null)
             {
                 Plugin.LogDebug($"Add duplicate [1] (questId={questId}, itemId={itemId}, savedFir={q.Fir}, fir={fir})");
                 q.Count += count;
@@ -371,15 +372,15 @@ namespace AllQuestsCheckmarks.Helpers
             }
 
             //Add to item list
-            if(!QuestItemsByItemId.TryGetValue(itemId, out ItemData items))
+            if (!QuestItemsByItemId.TryGetValue(itemId, out ItemData items))
             {
                 items = new ItemData();
                 QuestItemsByItemId.Add(itemId, items);
             }
 
-            if(items.Quests.TryGetValue(questId, out QuestValues questValues))
+            if (items.Quests.TryGetValue(questId, out QuestValues questValues))
             {
-                if(!skipCheck)
+                if (!skipCheck)
                 {
                     Plugin.LogSource?.LogError($"THIS SHOULD NEVER HAPPEN! questId={questId}, itemId={itemId}");
                     return;
@@ -413,11 +414,11 @@ namespace AllQuestsCheckmarks.Helpers
                 return;
             }
 
-            foreach(KeyValuePair<MongoID, QuestItems> item in questItems)
+            foreach (KeyValuePair<MongoID, QuestItems> item in questItems)
             {
                 item.Deconstruct(out MongoID itemId, out QuestItems items);
 
-                if(!QuestItemsByItemId.TryGetValue(itemId, out ItemData itemData))
+                if (!QuestItemsByItemId.TryGetValue(itemId, out ItemData itemData))
                 {
                     Plugin.LogSource?.LogError($"Attepted to remove non-existing quest item {item.Key} from quest {questId} data!");
                     continue;
@@ -438,8 +439,8 @@ namespace AllQuestsCheckmarks.Helpers
                 {
                     continue;
                 }
-                
-                if(itemData.Total != 0)
+
+                if (itemData.Total != 0)
                 {
                     Plugin.LogSource?.LogWarning($"Quest {questId} list for item {itemId} is empty, but item count is non-zero ({itemData.Total})!");
                 }

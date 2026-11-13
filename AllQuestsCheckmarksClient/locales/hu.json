@@ -1,0 +1,13 @@
+{
+	"aqc_in_stash": "Rejtekhelyen: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> Portyán talált)",
+	"aqc_total_needed": "Összesen kell: <color=#FFFF66>{0}</color>",
+	"aqc_total_needed_alt": "Összesen kell: <color=#FFFF66>{0}</color> Portyán talált, <color=#FF6666>{1}</color> Nem portyán talált",
+	"aqc_active_quests": "Aktív küldetésekhez:",
+	"aqc_future_quests": "Későbbi küldetésekhez:",
+	"aqc_fir": "Portyán talált",
+	"aqc_nonfir": "Nem portyán talált",
+	"aqc_squad_quests": "Csapattársnak kell:",
+	"aqc_hideout": "Rejtekhely fejlesztések ({0}):",
+	"aqc_barters": "Csere ajánlatok:",
+	"aqc_custom_trader": "Egyéni kereskedő"
+}

@@ -22,7 +22,7 @@ namespace AllQuestsCheckmarks.Patches
 
             try
             {
-                FieldInfo info = typeof(QuestItemViewPanel).GetField("_foundInRaidSprite", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo info = typeof(QuestItemViewPanel).GetField("_foundInRaidSprite", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 info.SetValue(____questItemViewPanel, Helpers.Assets.Checkmark);
             }
             catch

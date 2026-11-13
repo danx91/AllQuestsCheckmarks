@@ -6,5 +6,8 @@
 	"aqc_future_quests": "Przyszłe zadania:",
 	"aqc_fir": "FiR",
 	"aqc_nonfir": "Nie FiR",
-	"aqc_squad_quests": "Wymagane dla drużyny:"
+	"aqc_squad_quests": "Wymagane dla drużyny:",
+	"aqc_hideout": "Ulepszenia kryjówki ({0}):",
+	"aqc_barters": "Bartery:",
+	"aqc_custom_trader": "Niestandardowy handlarz"
 }

@@ -9,7 +9,7 @@
 		"server": "SPT_Runtime/user/mods/AllQuestsCheckmarks/"
 	},
 	"files": {
-		"AllQuestsCheckmarksServer/bin/Release/net9.0/AllQuestsCheckmarks-Server.dll": "server",
+		"AllQuestsCheckmarksServer/bin/Release/net10.0/AllQuestsCheckmarks-Server.dll": "server",
 		"AllQuestsCheckmarksClient/bin/Release/netstandard2.1/AllQuestsCheckmarks-Client.dll": "client",
 		"AllQuestsCheckmarksFika/bin/Release/netstandard2.1/AllQuestsCheckmarks-Fika.dll": "client",
 		"AllQuestsCheckmarksClient/locales": "client",

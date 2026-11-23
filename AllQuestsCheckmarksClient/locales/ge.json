@@ -1,0 +1,13 @@
+{
+	"aqc_in_stash": "Im Lager: <color=#66FF66>{0}</color> (<color=#FFFF66>{1}</color> FiR)",
+	"aqc_total_needed": "Insgesamt benötigt: <color=#FFFF66>{0}</color>",
+	"aqc_total_needed_alt": "Insgesamt benötigt: <color=#FFFF66>{0}</color> FiR, <color=#FF6666>{1}</color> Nicht-FiR",
+	"aqc_active_quests": "Aktive Aufgaben:",
+	"aqc_future_quests": "Zukünftige Aufgaben:",
+	"aqc_fir": "FiR",
+	"aqc_nonfir": "Nicht-FiR",
+	"aqc_squad_quests": "Benötigt für Gruppe:",
+	"aqc_hideout": "Versteck-Ausbauten ({0}):",
+	"aqc_barters": "Tauschhandel:",
+	"aqc_custom_trader": "Benutzerdefinierter Händler"
+}
